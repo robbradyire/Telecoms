@@ -3,5 +3,6 @@ public class Nothing {
 		System.out.println("Nothing.");
 		System.out.println("Even more nothing");
 		System.out.println("K.");
+		System.out.println("$wagmaster 2k12.");
 	}
 }
