@@ -17,7 +17,6 @@
  * 	-> (Base provided)
  *
  * - WorkRequest
- * 	-> Need to create
  *	-> Client side class
  *	-> Request includes how much work Client can currently handle (not fixed)
  *	-> On Server Side request indicates Clients workload doesn't contain target
