@@ -118,14 +118,14 @@ public class WorkRequest extends PacketContent {
 	// --------------------------------------------------------------
 	/**
 	 * toString
-	 * returns status of ping as a string
+	 * returns status of the WorkRequest as a string
 	 * 
-	 * @return "Ping to x has been sent" if the ping has been sent
-	 * @return "Ping to x has not been sent" if the ping has not been sent
+	 * @return "Request of size n to x from y"
 	 */
 	public String toString() {
-		return "Ping to " + getDestAddress().toString()
-				+ (hasBeenSent() == true ? "has " : "has not ") + "been sent.";
+		return "Request of size " + capacity + "to "
+				+ getDestAddress().toString() + "from "
+				+ getSrcAddress().toString();
 	}
 
 	/**
