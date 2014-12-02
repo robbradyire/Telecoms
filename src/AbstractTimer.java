@@ -1,6 +1,6 @@
 /**
  * Timer abstract class. Private classes extend from this where it is necessary
- * to have a timer (such as FileInfoContent and FramePacketContent etc)
+ * to have a timer (such as Ping etc)
  */
 public abstract class AbstractTimer implements Runnable {
 	protected PacketContent packet;
