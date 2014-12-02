@@ -20,14 +20,20 @@ public class Client extends Node {
 	 */
 	Client(Terminal terminal, String dstHost, int dstPort, int srcPort)
 			throws java.net.BindException {
-		try {
-			this.terminal = terminal;
-			this.dstAddress = new InetSocketAddress(dstHost, dstPort);
-			this.socket = new DatagramSocket(srcPort);
-			this.listener.go();
-		}
-		catch (java.lang.Exception e) {
-			e.printStackTrace();
+		boolean srcAssigned = false;
+		while (!srcAssigned) {
+			try {
+				this.terminal = terminal;
+				this.dstAddress = new InetSocketAddress(dstHost, dstPort);
+				this.socket = new DatagramSocket(srcPort);
+				srcAssigned = true;
+				this.listener.go();
+			}
+			// srcPort in use, need to change
+			catch (java.lang.Exception e) {
+				srcPort += 1000;
+				srcAssigned = false;
+			}
 		}
 	}
 
@@ -58,6 +64,7 @@ public class Client extends Node {
 		}
 		catch (java.net.BindException e) {
 			// Client already running with DEFAULT_SRC_PORT
+			// Handled in Client constructor to allow multiple Clients at one time
 		}
 
 		terminal.println("Program completed");
