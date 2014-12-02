@@ -8,6 +8,7 @@ import java.net.DatagramPacket;
  * The class is the basis for packet contents of various types.
  */
 public abstract class PacketContent {
+	public static final int PING_REQUEST = 1;
 	// public static final int ACKPACKET = 10;
 	// public static final int FILEINFO = 100;
 	protected int type = 0;

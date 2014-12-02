@@ -33,7 +33,6 @@
  *	-> Look at end of file for example use
  *
  * - PingRequest
- *	-> Need to create
  *	-> Server side class
  *	-> Controlled in Connection class
  *	-> Sends a ping request to the Client
