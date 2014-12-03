@@ -1,4 +1,5 @@
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
 import java.net.InetSocketAddress;
@@ -35,6 +36,15 @@ public class WorkRequest extends PacketContent {
 		this.controller = client;
 		this.destAddress = destAddress;
 	}
+	
+	/**
+	 * WorkloadPacket constructor
+	 * 
+	 * @param oin: ObjectInputStream that contains data about the packet
+	 */
+//	protected WorkRequest(ObjectInputStream oin) {
+//		// Not sure if needed yet TODO
+//	}
 
 	// Methods
 	// -------------------------------------------------------------
