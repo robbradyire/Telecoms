@@ -1,4 +1,8 @@
+import java.net.InetSocketAddress;
 
-public class Statistics {
-	
+
+public abstract class Statistics {
+	protected InetSocketAddress address;
+	protected int workProcessed;
+	protected int timeWorked;
 }

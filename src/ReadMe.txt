@@ -44,7 +44,6 @@
  *	-> Sends a response upon receipt of a PingRequest
  *
  * - WorkloadPacket
- *	-> need to implement
  *	-> Server side class
  *	-> Server assembles workload based on WorkRequest data
  *	-> Server sends WorkloadPacket with workload and other data
@@ -69,12 +68,14 @@
  *	-> Client side class
  *	-> Client must acknowledge the receipt of WorkLoadPacket so that the Server doesn't resend it
  *
- * - Statistics
- *	-> Need to implement
- *	-> Server and Client sides class
+ * - Statistics (Abstract class)
  *	-> Maintains data on workload processed
- *	-> On the Server side, maintains data on who has done how much and is currently doing what etc
- *	-> On Client side, maintains data on how much individual has done, how much it is doing etc
+ *
+ * - ClientStatistics
+ * 	-> Maintains data about individual worker (work processed, current workload etc)
+ *
+ * - ServerStatistics
+ * 	-> Maintains data on who has done how much and is currently doing what etc
  *
  * - TerminateWork
  *	-> Need to implement
