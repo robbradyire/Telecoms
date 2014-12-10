@@ -3,6 +3,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.net.SocketException;
 
 /**
@@ -14,21 +15,19 @@ import java.net.SocketException;
  */
 public class PingRequest extends PacketContent {
 	private Server controller;
-	private InetSocketAddress destAddress;
+	private SocketAddress destAddress;
 	private Timer timer;
 	private boolean pinged;
 
-	// Constructor
-	// -------------------------------------------------------------
 	/**
 	 * PingRequest constructor
 	 * 
 	 * @param destAddress: workers address for the PingRequest
 	 * @param server: Server reference to enable send method in this class
 	 */
-	public PingRequest(InetSocketAddress destAddress, Server server) {
+	public PingRequest(SocketAddress client, Server server) {
 		this.type = PING_REQUEST;
-		this.destAddress = destAddress;
+		this.destAddress = client;
 		this.controller = server;
 		this.pinged = false;
 	}
@@ -39,19 +38,17 @@ public class PingRequest extends PacketContent {
 	 * @param oin: ObjectInputStream that contains data about the packet
 	 */
 	protected PingRequest(ObjectInputStream oin) {
-		// Not sure if needed yet
+		this.type = PING_REQUEST;
 	}
 
-	// Methods
-	// -------------------------------------------------------------
 	/**
-	 * sendPing
+	 * send
 	 * sends a PingRequest to the worker and starts the timer
 	 * 
 	 * @throws IOException
 	 * @throws SocketException
 	 */
-	public void sendPing() throws IOException, SocketException {
+	public void send() throws IOException, SocketException {
 		DatagramPacket packet = this.toDatagramPacket();
 		packet.setSocketAddress(this.getDestAddress());
 		this.controller.socket.send(packet);
@@ -65,7 +62,7 @@ public class PingRequest extends PacketContent {
 	 * @param out: output stream to write
 	 */
 	protected void toObjectOutputStream(ObjectOutputStream out) {
-		// not sure if needed
+		// nothing to write
 	}
 
 	/**
@@ -78,15 +75,13 @@ public class PingRequest extends PacketContent {
 		this.timer.killThread();
 	}
 
-	// Getters
-	// --------------------------------------------------------------
 	/**
 	 * getDestAddress
 	 * returns the destination address of the ping
 	 * 
 	 * @return destAddress: the destination address of the ping
 	 */
-	public InetSocketAddress getDestAddress() {
+	public SocketAddress getDestAddress() {
 		return destAddress;
 	}
 
@@ -101,8 +96,6 @@ public class PingRequest extends PacketContent {
 		return this.pinged;
 	}
 
-	// toStrings
-	// --------------------------------------------------------------
 	/**
 	 * toString
 	 * returns status of ping as a string
@@ -116,7 +109,7 @@ public class PingRequest extends PacketContent {
 	}
 
 	/**
-	 * Timer for the PingRequest.
+	 * Timer
 	 */
 	private class Timer extends AbstractTimer {
 
@@ -124,7 +117,7 @@ public class PingRequest extends PacketContent {
 		// -----------------------------------------------------
 		public Timer(PingRequest ping) {
 			this.packet = ping;
-			this.sleepTime = 500;
+			this.sleepTime = 1000;
 			this.thread = new Thread(this);
 			this.thread.start();
 		}
@@ -142,7 +135,7 @@ public class PingRequest extends PacketContent {
 				Thread.sleep(this.sleepTime);
 				if (!((PingRequest) this.packet).hasBeenSent()) {
 					System.out.println("Ping resent");
-					((PingRequest) this.packet).sendPing();
+					((PingRequest) this.packet).send();
 				}
 			}
 			catch (Exception e) {

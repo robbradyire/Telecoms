@@ -1,7 +1,8 @@
-
+import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
+import java.net.SocketException;
 
 import tcdIO.Terminal;
 
@@ -9,47 +10,59 @@ import tcdIO.Terminal;
  * Client class An instance accepts user input
  */
 public class Client extends Node {
-	private static int DEFAULT_SRC_PORT = 50000;
 	private static final int DEFAULT_DST_PORT = 50001;
 	private static final String DEFAULT_DST_NODE = "localhost";
 	private Terminal terminal;
 	public InetSocketAddress dstAddress;
+	private SetupPacket setupRequest;
 
 	/**
 	 * Constructor Attempts to create socket at given port and create an
 	 * InetSocketAddress for the destinations
+	 * 
+	 * @throws SocketException
 	 */
 	Client(Terminal terminal, String dstHost, int dstPort, int srcPort)
-			throws java.net.BindException {
-		boolean srcAssigned = false;
-		while (!srcAssigned) {
-			try {
-				this.terminal = terminal;
-				this.dstAddress = new InetSocketAddress(dstHost, dstPort);
-				this.socket = new DatagramSocket(srcPort);
-				srcAssigned = true;
-				this.listener.go();
-			}
-			// srcPort in use, need to change
-			catch (java.lang.Exception e) {
-				srcPort += 1000;
-				srcAssigned = false;
-			}
-		}
+			throws SocketException {
+		this.terminal = terminal;
+		this.dstAddress = new InetSocketAddress(dstHost, dstPort);
+		this.socket = new DatagramSocket(srcPort);
+		this.listener.go();
 	}
 
 	/**
 	 * Assume that incoming packets contain a String and print the string.
 	 */
 	public synchronized void onReceipt(DatagramPacket packet) {
-		// TODO
+		PacketContent content = PacketContent.fromDatagramPacket(packet);
+		switch (content.getType()) {
+			case PacketContent.SETUP_ACK:
+				setupRequest.confirmRequest();
+				this.notify();
+				break;
+			case PacketContent.PING_REQUEST:
+				PingResponse ping = new PingResponse(this);
+				try {
+					terminal.println("Sending ping response");
+					ping.send();
+				}
+				catch (SocketException e) {
+					e.printStackTrace();
+				}
+				catch (IOException e) {
+					e.printStackTrace();
+				}
+				break;
+		}
 	}
 
 	/**
 	 * Sender Method
 	 */
 	public synchronized void start() throws Exception {
-		// TODO
+		setupRequest = new SetupPacket(this);
+		setupRequest.sendRequest();
+		this.wait();
 	}
 
 	/**
@@ -59,13 +72,19 @@ public class Client extends Node {
 	 */
 	public static void main(String[] args) throws Exception {
 		Terminal terminal = new Terminal("Client");
-		try {
-			(new Client(terminal, DEFAULT_DST_NODE, DEFAULT_DST_PORT,
-					DEFAULT_SRC_PORT)).start();
-		}
-		catch (java.net.BindException e) {
-			// Client already running with DEFAULT_SRC_PORT
-			// Handled in Client constructor to allow multiple Clients at one time
+		int srcAddress = 50000;
+		boolean srcAssigned = false;
+		while (!srcAssigned) {
+			try {
+				(new Client(terminal, DEFAULT_DST_NODE, DEFAULT_DST_PORT,
+						srcAddress)).start();
+				srcAssigned = true;
+			}
+			// srcAddress already in use, assign a new one
+			catch (java.net.BindException e) {
+				srcAddress += 1000;
+				srcAssigned = false;
+			}
 		}
 
 		terminal.println("Program completed");

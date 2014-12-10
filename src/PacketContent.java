@@ -1,4 +1,3 @@
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
@@ -9,8 +8,11 @@ import java.net.DatagramPacket;
  * The class is the basis for packet contents of various types.
  */
 public abstract class PacketContent {
-	public static final int PING_REQUEST = 1;
-	public static final int WORK_REQUEST = 2;
+	public static final int SETUP_REQUEST = 0;
+	public static final int SETUP_ACK = 1;
+	public static final int PING_REQUEST = 2;
+	public static final int PING_RESPONSE = 3;
+	public static final int WORK_REQUEST = 4;
 	// public static final int ACKPACKET = 10;
 	// public static final int FILEINFO = 100;
 	protected int type = 0;
@@ -19,7 +21,7 @@ public abstract class PacketContent {
 	 * Constructs an object out of a datagram packet.
 	 * 
 	 * @param packet
-	 *            Packet to analyse.
+	 *        Packet to analyse.
 	 */
 	public static PacketContent fromDatagramPacket(DatagramPacket packet) {
 		PacketContent content = null;
@@ -33,14 +35,18 @@ public abstract class PacketContent {
 			oin = new ObjectInputStream(bin);
 			type = oin.readInt(); // read type from beginning of packet
 			switch (type) { // depending on type create content object
-			// case ACKPACKET:
-			// content = new AckPacketContent(oin);
-			// break;
-			// case FILEINFO:
-			// content = new FileInfoContent(oin);
-			// break;
-				default:
-					content = null;
+				case SETUP_REQUEST:
+					content = new SetupPacket(oin);
+					break;
+				case SETUP_ACK:
+					content = new AcknowledgeSetup(oin);
+					break;
+				case PING_REQUEST:
+					content = new PingRequest(oin);
+					break;
+				case PING_RESPONSE:
+					content = new PingResponse(oin);
+					break;
 			}
 			oin.close();
 			bin.close();
@@ -56,7 +62,7 @@ public abstract class PacketContent {
 	 * This method is used to transform content into an output stream.
 	 * 
 	 * @param out
-	 *            Stream to write the content for the packet to.
+	 *        Stream to write the content for the packet to.
 	 */
 	protected abstract void toObjectOutputStream(ObjectOutputStream out);
 
