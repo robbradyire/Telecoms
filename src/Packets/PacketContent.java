@@ -16,6 +16,7 @@ public abstract class PacketContent {
 	public static final int PING_RESPONSE = 3;
 	public static final int WORK_REQUEST = 4;
 	public static final int TASK_COMPLETE = 5;
+	public static final int END_ALL_WORK = 6;
 	protected int type = 0;
 
 	/**
@@ -50,6 +51,9 @@ public abstract class PacketContent {
 					break;
 				case TASK_COMPLETE:
 					content = new SucessPacket(oin);
+					break;
+				case END_ALL_WORK:
+					content = new TerminateWork(oin);
 					break;
 			}
 			oin.close();
