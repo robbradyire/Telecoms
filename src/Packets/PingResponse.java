@@ -1,4 +1,5 @@
 package Packets;
+
 import Overhead.*;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -40,10 +41,18 @@ public class PingResponse extends PacketContent {
 	 * @throws IOException
 	 * @throws SocketException
 	 */
-	public void send() throws IOException, SocketException {
-		DatagramPacket packet = this.toDatagramPacket();
-		packet.setSocketAddress(this.getDestAddress());
-		this.controller.socket.send(packet);
+	public void send() {
+		try {
+			DatagramPacket packet = this.toDatagramPacket();
+			packet.setSocketAddress(this.getDestAddress());
+			this.controller.socket.send(packet);
+		}
+		catch (SocketException e) {
+			// no action
+		}
+		catch (IOException e) {
+			// no action
+		}
 	}
 
 	/**
