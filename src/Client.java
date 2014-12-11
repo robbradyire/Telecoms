@@ -15,6 +15,7 @@ public class Client extends Node {
 	private Terminal terminal;
 	public InetSocketAddress dstAddress;
 	private SetupPacket setupRequest;
+	private SucessPacket sucessPacket;
 
 	/**
 	 * Constructor Attempts to create socket at given port and create an
@@ -53,6 +54,10 @@ public class Client extends Node {
 					e.printStackTrace();
 				}
 				break;
+			default:
+				confirmSucess();
+				this.notify();
+				break;
 		}
 	}
 
@@ -63,6 +68,26 @@ public class Client extends Node {
 		setupRequest = new SetupPacket(this);
 		setupRequest.sendRequest();
 		this.wait();
+		String dataString = "john smith\ndavid smith\nmichael smith"
+				+ "\nchris smith\nmike smith\narun kumar\njames smith\n"
+				+ "namit kumar\nimran khan\njason smith\nchris johnson\n"
+				+ "jessica smith\nchris brown\nmike jones\nmichael johnson\n"
+				+ "mark smith\nsarah smith\nanil kumar\nmanoj kumar\n";
+		byte[] data = dataString.getBytes();
+		ProcessData process = new ProcessData(data, "sarah smith");
+		process.processTheData(this);
+		sucessPacket = new SucessPacket(this);
+		this.wait();
+		sucessPacket.send();
+		this.wait();
+	}
+
+	/**
+	 * TODO
+	 * 
+	 */
+	public void confirmSucess() {
+		this.sucessPacket.hasBeenSent();
 	}
 
 	/**

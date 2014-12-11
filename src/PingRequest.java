@@ -2,7 +2,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
-import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.SocketException;
 
@@ -45,14 +44,20 @@ public class PingRequest extends PacketContent {
 	 * send
 	 * sends a PingRequest to the worker and starts the timer
 	 * 
-	 * @throws IOException
-	 * @throws SocketException
 	 */
-	public void send() throws IOException, SocketException {
-		DatagramPacket packet = this.toDatagramPacket();
-		packet.setSocketAddress(this.getDestAddress());
-		this.controller.socket.send(packet);
-		this.timer = new Timer(this);
+	public void send() {
+		try {
+			DatagramPacket packet = this.toDatagramPacket();
+			packet.setSocketAddress(this.getDestAddress());
+			this.controller.socket.send(packet);
+			this.timer = new Timer(this);
+		}
+		catch (SocketException e) {
+			// no action
+		}
+		catch (IOException e) {
+			// no action
+		}
 	}
 
 	/**

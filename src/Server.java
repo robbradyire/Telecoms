@@ -9,6 +9,7 @@ public class Server extends Node {
 	public static final int DEFAULT_PORT = 50001;
 	private Terminal terminal;
 	private Connection connectionList;
+	private boolean pinging = false;
 
 	/*
 	 * constructor gives server a terminal and a socket starting its thread
@@ -37,39 +38,45 @@ public class Server extends Node {
 				connectionList.addConnection(packet.getSocketAddress());
 				AcknowledgeSetup ack = new AcknowledgeSetup(this,
 						packet.getSocketAddress());
-				try {
-					System.out.println(connectionList.numberOfConnections());
-					ack.send();
-				}
-				catch (SocketException e) {
-					e.printStackTrace();
-				}
-				catch (IOException e) {
-					e.printStackTrace();
-				}
+				System.out.println(connectionList.numberOfConnections());
+				ack.send();
 				break;
 			case PacketContent.PING_RESPONSE:
 				connectionList.confirmPing(packet.getSocketAddress());
 				break;
+			case PacketContent.TASK_COMPLETE:
+				DatagramPacket response = content.toDatagramPacket();
+				response.setSocketAddress(packet.getSocketAddress());
+				try {
+					this.socket.send(response);
+				}
+				catch (IOException e) {
+					e.printStackTrace();
+				}
+
+				pinging = true;
+				this.notify();
 			default:
 				break;
 		}
 		terminal.println(connectionList.toString());
 	}
 
+	/**
+	 * start
+	 * controls sequence of operations performed by the Server
+	 * 
+	 * @throws Exception
+	 */
 	public synchronized void start() throws Exception {
 		connectionList = new Connection(this);
-		System.out.println(connectionList.numberOfConnections());
-		boolean pinging = false;
+		pinging = false;
 		while (!pinging) {
-			this.wait(1000);
+			this.wait(2000);
 			connectionList.ping();
 		}
 	}
 
-	/*
-	 * 
-	 */
 	public static void main(String[] args) {
 		try {
 			Terminal terminal = new Terminal("Server");

@@ -39,14 +39,20 @@ public class SetupPacket extends PacketContent {
 	 * send
 	 * sends a request to set up a connection to the Server and start the timer
 	 * 
-	 * @throws IOException
-	 * @throws SocketException
 	 */
-	public void sendRequest() throws IOException, SocketException {
-		DatagramPacket packet = this.toDatagramPacket();
-		packet.setSocketAddress(this.controller.dstAddress);
-		this.controller.socket.send(packet);
-		this.timer = new Timer(this);
+	public void sendRequest() {
+		try {
+			DatagramPacket packet = this.toDatagramPacket();
+			packet.setSocketAddress(this.controller.dstAddress);
+			this.controller.socket.send(packet);
+			this.timer = new Timer(this);
+		}
+		catch (SocketException e) {
+			// no action
+		}
+		catch (IOException e) {
+			// no action
+		}
 	}
 
 	/**
@@ -97,7 +103,7 @@ public class SetupPacket extends PacketContent {
 	private class Timer extends AbstractTimer {
 		public Timer(SetupPacket work) {
 			this.packet = work;
-			this.sleepTime = 500;
+			this.sleepTime = 1000;
 			this.thread = new Thread(this);
 			this.thread.start();
 		}

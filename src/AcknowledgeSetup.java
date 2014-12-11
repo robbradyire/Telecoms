@@ -41,13 +41,19 @@ public class AcknowledgeSetup extends PacketContent {
 	 * send
 	 * Acknowledge the receipt of a SetupPacket
 	 * 
-	 * @throws IOException
-	 * @throws SocketException
 	 */
-	public void send() throws IOException, SocketException {
-		DatagramPacket packet = this.toDatagramPacket();
-		packet.setSocketAddress(this.getDstAddress());
-		this.controller.socket.send(packet);
+	public void send() {
+		try {
+			DatagramPacket packet = this.toDatagramPacket();
+			packet.setSocketAddress(this.getDstAddress());
+			this.controller.socket.send(packet);
+		}
+		catch (SocketException e) {
+			// no action
+		}
+		catch (IOException e) {
+			// no action
+		}
 	}
 
 	/**

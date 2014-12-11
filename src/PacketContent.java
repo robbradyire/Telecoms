@@ -13,8 +13,7 @@ public abstract class PacketContent {
 	public static final int PING_REQUEST = 2;
 	public static final int PING_RESPONSE = 3;
 	public static final int WORK_REQUEST = 4;
-	// public static final int ACKPACKET = 10;
-	// public static final int FILEINFO = 100;
+	public static final int TASK_COMPLETE = 5;
 	protected int type = 0;
 
 	/**
@@ -46,6 +45,9 @@ public abstract class PacketContent {
 					break;
 				case PING_RESPONSE:
 					content = new PingResponse(oin);
+					break;
+				case TASK_COMPLETE:
+					content = new SucessPacket(oin);
 					break;
 			}
 			oin.close();
