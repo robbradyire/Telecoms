@@ -1,3 +1,5 @@
+package Packets;
+import Overhead.*;
 import java.io.ObjectOutputStream;
 public class TerminateWork extends PacketContent {
 

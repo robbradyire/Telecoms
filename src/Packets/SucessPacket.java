@@ -1,3 +1,5 @@
+package Packets;
+import Overhead.*;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -10,39 +12,40 @@ import java.net.SocketException;
  *         WorkRequest
  * 
  */
-public class SetupPacket extends PacketContent {
+public class SucessPacket extends PacketContent {
 	private boolean hasBeenSent;
 	private Timer timer;
 	private Client controller;
 
 	/**
-	 * SetupPacket constructor
+	 * SucessPacket constructor
 	 * 
 	 * @param client: reference object to sender of the packet
 	 */
-	public SetupPacket(Client client) {
-		this.type = SETUP_REQUEST;
+	public SucessPacket(Client client) {
+		this.type = TASK_COMPLETE;
 		this.hasBeenSent = false;
 		this.controller = client;
 	}
 
 	/**
-	 * SetupPacket constructor
+	 * SucessPacket constructor
 	 * 
 	 * @param oin: ObjectInputStream that contains data about the packet
 	 */
-	protected SetupPacket(ObjectInputStream oin) {
-		this.type = SETUP_REQUEST;
+	protected SucessPacket(ObjectInputStream oin) {
+		this.type = TASK_COMPLETE;
 	}
 
 	/**
 	 * send
-	 * sends a request to set up a connection to the Server and start the timer
+	 * sends a message to the Server to let it know that the Client has
+	 * completed the objective and start the timer
 	 * 
 	 */
-	public void sendRequest() {
+	public void send() {
+		DatagramPacket packet = this.toDatagramPacket();
 		try {
-			DatagramPacket packet = this.toDatagramPacket();
 			packet.setSocketAddress(this.controller.dstAddress);
 			this.controller.socket.send(packet);
 			this.timer = new Timer(this);
@@ -66,20 +69,20 @@ public class SetupPacket extends PacketContent {
 	}
 
 	/**
-	 * confirmRequest
-	 * Indicates that SetupRequest has been responded to and stops the timer
+	 * confirmReciept
+	 * Indicates that SucessPacket has been responded to and stops the timer
 	 */
-	public void confirmRequest() {
+	public void confirmReciept() {
 		this.hasBeenSent = true;
 		this.timer.killThread();
 	}
 
 	/**
 	 * hasBeenSent
-	 * returns boolean based on whether WorkRequest has been responded to
+	 * returns boolean based on whether SucessPacket has been responded to
 	 * 
-	 * @return true: if SetupRequest responded to
-	 * @return false: if WorkRequest not yet responded to
+	 * @return true: if SucessPacket responded to
+	 * @return false: if SucessPacket not yet responded to
 	 */
 	public boolean hasBeenSent() {
 		return this.hasBeenSent;
@@ -93,17 +96,17 @@ public class SetupPacket extends PacketContent {
 	 * @return Setup request from x has not been acknowledged
 	 */
 	public String toString() {
-		return "Setup request from " + controller.socket.toString() + " has "
-				+ (hasBeenSent() ? " been" : " not been") + " acknowledged";
+		return "";
+		// TODO
 	}
 
 	/**
 	 * Timer
 	 */
 	private class Timer extends AbstractTimer {
-		public Timer(SetupPacket work) {
+		public Timer(SucessPacket work) {
 			this.packet = work;
-			this.sleepTime = 1000;
+			this.sleepTime = 500;
 			this.thread = new Thread(this);
 			this.thread.start();
 		}
@@ -117,9 +120,9 @@ public class SetupPacket extends PacketContent {
 		public void run() throws SecurityException {
 			try {
 				Thread.sleep(this.sleepTime);
-				if (!((SetupPacket) this.packet).hasBeenSent()) {
-					System.out.println("Setup request resent");
-					((SetupPacket) this.packet).sendRequest();
+				if (!((SucessPacket) this.packet).hasBeenSent()) {
+					System.out.println("SucessPacket resent");
+					((SucessPacket) this.packet).send();
 				}
 			}
 			catch (Exception e) {
