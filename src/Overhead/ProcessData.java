@@ -1,5 +1,11 @@
 package Overhead;
+
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.SocketException;
+
 import Packets.*;
+
 /**
  * ProcessData
  * 
@@ -23,37 +29,50 @@ public class ProcessData {
 	}
 
 	/**
+	 * processTheData
+	 * searches the data for the target
 	 * 
 	 * @param worker
+	 * 
+	 * @return 0: data doesn't contain target
+	 * @return 1: data does contain target
 	 */
-	public void processTheData(Client worker) {
+	public int processTheData(Client worker) {
 		for (String s : data) {
 			if (s.equals(getTarget())) {
-				System.out.println("Sucess finding " + getTarget());
+				return 1;
 				targetFound = true;
 			}
 		}
+		return 0;
 	}
 
 	/**
+	 * getTarget
+	 * return String representation of the task target
 	 * 
-	 * @return
+	 * @return target: the name being searched for
 	 */
 	public String getTarget() {
 		return target;
 	}
 
 	/**
+	 * getData
+	 * returns the data being processed
 	 * 
-	 * @return
+	 * @return data: the data being processed
 	 */
 	public String[] getData() {
 		return data;
 	}
 
 	/**
+	 * foundTarget
+	 * return boolean based on whether the task has been complete
 	 * 
-	 * @return
+	 * @return true: task has been complete
+	 * @return false: task has not been complete
 	 */
 	public boolean foundTarget() {
 		return targetFound;

@@ -1,4 +1,5 @@
 package Packets;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -38,15 +39,15 @@ public class WorkRequest extends PacketContent {
 		this.controller = client;
 		this.destAddress = destAddress;
 	}
-	
+
 	/**
 	 * WorkloadPacket constructor
 	 * 
 	 * @param oin: ObjectInputStream that contains data about the packet
 	 */
-//	protected WorkRequest(ObjectInputStream oin) {
-//		// Not sure if needed yet TODO
-//	}
+	//	protected WorkRequest(ObjectInputStream oin) {
+	//		// Not sure if needed yet TODO
+	//	}
 
 	// Methods
 	// -------------------------------------------------------------
@@ -54,14 +55,20 @@ public class WorkRequest extends PacketContent {
 	 * sendPing
 	 * sends a PingRequest to the worker and starts the timer
 	 * 
-	 * @throws IOException
-	 * @throws SocketException
 	 */
-	public void sendRequest() throws IOException, SocketException {
-		DatagramPacket packet = this.toDatagramPacket();
-		packet.setSocketAddress(this.getDestAddress());
-		this.controller.socket.send(packet);
-		this.timer = new Timer(this);
+	public void sendRequest() {
+		try {
+			DatagramPacket packet = this.toDatagramPacket();
+			packet.setSocketAddress(this.getDestAddress());
+			this.controller.socket.send(packet);
+			this.timer = new Timer(this);
+		}
+		catch (SocketException e) {
+			// no action
+		}
+		catch (IOException e) {
+			// no action
+		}
 	}
 
 	/**

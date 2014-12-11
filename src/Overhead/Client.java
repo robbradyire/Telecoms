@@ -1,4 +1,5 @@
 package Overhead;
+
 import Packets.*;
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -45,19 +46,10 @@ public class Client extends Node {
 				break;
 			case PacketContent.PING_REQUEST:
 				PingResponse ping = new PingResponse(this);
-				try {
-					terminal.println("Sending ping response");
-					ping.send();
-				}
-				catch (SocketException e) {
-					e.printStackTrace();
-				}
-				catch (IOException e) {
-					e.printStackTrace();
-				}
+				terminal.println("Sending ping response");
+				ping.send();
 				break;
 			default:
-				confirmSucess();
 				this.notify();
 				break;
 		}
@@ -77,19 +69,11 @@ public class Client extends Node {
 				+ "mark smith\nsarah smith\nanil kumar\nmanoj kumar\n";
 		byte[] data = dataString.getBytes();
 		ProcessData process = new ProcessData(data, "sarah smith");
-		process.processTheData(this);
+		int sucess = process.processTheData(this);
 		sucessPacket = new SucessPacket(this);
 		this.wait();
 		sucessPacket.send();
 		this.wait();
-	}
-
-	/**
-	 * TODO
-	 * 
-	 */
-	public void confirmSucess() {
-		this.sucessPacket.hasBeenSent();
 	}
 
 	/**

@@ -1,4 +1,5 @@
 package Packets;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -44,13 +45,19 @@ public class WorkloadPacket extends PacketContent {
 	 * sendWorkload
 	 * sends a WorkloadPacket to the worker
 	 * 
-	 * @throws IOException
-	 * @throws SocketException
 	 */
-	public void sendWorkload() throws IOException, SocketException {
-		DatagramPacket packet = this.toDatagramPacket();
-		packet.setSocketAddress(this.getDestAddress());
-		this.controller.socket.send(packet);
+	public void sendWorkload() {
+		try {
+			DatagramPacket packet = this.toDatagramPacket();
+			packet.setSocketAddress(this.getDestAddress());
+			this.controller.socket.send(packet);
+		}
+		catch (SocketException e) {
+			// no action
+		}
+		catch (IOException e) {
+			// no action
+		}
 	}
 
 	/**
