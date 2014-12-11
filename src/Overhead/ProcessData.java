@@ -40,8 +40,8 @@ public class ProcessData {
 	public int processTheData(Client worker) {
 		for (String s : data) {
 			if (s.equals(getTarget())) {
-				return 1;
 				targetFound = true;
+				return 1;
 			}
 		}
 		return 0;
