@@ -141,9 +141,6 @@ public class PingRequest extends PacketContent {
 		public void run() throws SecurityException {
 			try {
 				Thread.sleep(this.sleepTime);
-				if (!((PingRequest) this.packet).hasBeenSent()) {
-					// i dunno
-				}
 			}
 			catch (Exception e) {
 				// Thread interrupted
