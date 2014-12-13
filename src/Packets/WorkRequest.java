@@ -45,11 +45,9 @@ public class WorkRequest extends PacketContent {
 		try {
 			this.type = WORK_REQUEST;
 			this.capacity = oin.readInt();
-			this.controller = (Client) oin.readObject();
-			this.hasBeenSent = oin.readBoolean();
 		}
-		catch (Exception e) {
-			e.printStackTrace();
+		catch (IOException e) {
+			System.out.println("Error in WorkRequest oin constructor");
 		}
 	}
 
@@ -82,15 +80,7 @@ public class WorkRequest extends PacketContent {
 	 * @param out: output stream to write
 	 */
 	protected void toObjectOutputStream(ObjectOutputStream out) {
-		try{
-			this.type = WORK_REQUEST;
-			out.writeInt(capacity);
-			out.writeObject(controller);
-			out.writeBoolean(hasBeenSent);		
-			
-		}catch(Exception e){
-			e.printStackTrace();
-		}
+		// not sure if needed
 	}
 
 	/**
@@ -133,7 +123,7 @@ public class WorkRequest extends PacketContent {
 	 */
 	public String toString() {
 		return "Request of size " + capacity + "to "
-				+ Client.DEFAULT_DST_PORT + "from " + controller.dstAddress;
+				+ controller.DEFAULT_DST_PORT + "from " + controller.dstAddress;
 	}
 
 	/**

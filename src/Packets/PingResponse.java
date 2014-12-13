@@ -1,7 +1,6 @@
 package Packets;
 
 import Overhead.*;
-
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -32,12 +31,7 @@ public class PingResponse extends PacketContent {
 	 * @param oin: ObjectInputStream that contains data about the packet
 	 */
 	protected PingResponse(ObjectInputStream oin) {
-		try {
-			this.type = PING_RESPONSE;
-			this.controller = (Client) oin.readObject();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		this.type = PING_RESPONSE;
 	}
 
 	/**
@@ -77,12 +71,7 @@ public class PingResponse extends PacketContent {
 	 * @param out: output stream to write
 	 */
 	protected void toObjectOutputStream(ObjectOutputStream out) {
-		try{
-			this.type = PING_RESPONSE;
-			out.writeObject(controller);
-		} catch (Exception e){
-			e.printStackTrace();
-		}
+		// nothing to write
 	}
 
 	@Override

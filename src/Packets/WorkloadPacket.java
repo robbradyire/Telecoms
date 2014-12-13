@@ -6,13 +6,8 @@ import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
-
 import Overhead.*;
-/**
- * 
- * @author Tomas Barry & Calvin Nolan.
- *
- */
+
 public class WorkloadPacket extends PacketContent {
 	private byte[] data;
 	private Server controller;
@@ -30,7 +25,7 @@ public class WorkloadPacket extends PacketContent {
 	public WorkloadPacket(byte[] data, InetSocketAddress destAddress,
 			Server server) {
 		this.data = data;
-		this.type = WORKLOAD_PACKET;
+		this.type = PING_REQUEST;
 		this.destAddress = destAddress;
 		this.controller = server;
 	}
@@ -41,15 +36,7 @@ public class WorkloadPacket extends PacketContent {
 	 * @param oin: ObjectInputStream that contains data about the packet
 	 */
 	protected WorkloadPacket(ObjectInputStream oin) {
-		try {
-			this.type = WORKLOAD_PACKET;
-			this.controller = (Server) oin.readObject();
-			this.destAddress = (InetSocketAddress) oin.readObject();
-			this.data = new byte[oin.available()];
-			oin.read(data);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		// Not sure if needed yet
 	}
 
 	// Methods
@@ -65,26 +52,22 @@ public class WorkloadPacket extends PacketContent {
 			packet.setSocketAddress(this.getDestAddress());
 			this.controller.socket.send(packet);
 		}
-		catch (Exception e) {
-			System.err.println("Error: " + e.getMessage());
+		catch (SocketException e) {
+			// no action
+		}
+		catch (IOException e) {
+			// no action
 		}
 	}
 
 	/**
-	 * toObjectOutputStream
+	 * tooObjectOutputStream
 	 * writes content into an ObjectOutputStream
 	 * 
 	 * @param out: output stream to write
 	 */
 	protected void toObjectOutputStream(ObjectOutputStream out) {
-		try {
-			this.type = WORKLOAD_PACKET;
-			out.writeObject(controller);
-			out.writeObject(destAddress);
-			out.write(data);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		// not sure if needed
 	}
 
 	// Getters
@@ -115,7 +98,7 @@ public class WorkloadPacket extends PacketContent {
 	 * toString
 	 * returns the data in the packet as String
 	 * 
-	 * @return names in the byte array in string form.
+	 * @return "John Don"
 	 */
 	public String toString() {
 		return new String(this.data);

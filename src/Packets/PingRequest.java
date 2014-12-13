@@ -1,11 +1,9 @@
 package Packets;
 import Overhead.*;
-
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
-import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.SocketException;
 
@@ -42,14 +40,7 @@ public class PingRequest extends PacketContent {
 	 * @param oin: ObjectInputStream that contains data about the packet
 	 */
 	protected PingRequest(ObjectInputStream oin) {
-		try {
-			this.type = PING_REQUEST;
-			this.controller = (Server) oin.readObject();
-			this.destAddress = (InetSocketAddress) oin.readObject();
-			this.pinged = oin.readBoolean();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		this.type = PING_REQUEST;
 	}
 
 	/**
@@ -79,14 +70,7 @@ public class PingRequest extends PacketContent {
 	 * @param out: output stream to write
 	 */
 	protected void toObjectOutputStream(ObjectOutputStream out) {
-		try {
-			type = PING_REQUEST;
-			out.writeObject(controller);
-			out.writeObject(destAddress);
-			out.writeBoolean(pinged);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		// nothing to write
 	}
 
 	/**
