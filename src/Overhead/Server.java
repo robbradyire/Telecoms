@@ -16,6 +16,7 @@ public class Server extends Node {
 	private Connection connectionList;
 	private boolean pinging = false;
 	private AcknowledgeSetup ack;
+	private WorkloadPacket workLoad;
 	private TerminateWork terminate;
 
 	/*
@@ -47,6 +48,14 @@ public class Server extends Node {
 				ack = new AcknowledgeSetup(this, packet.getSocketAddress());
 				ack.send();
 				break;
+			case PacketContent.WORK_REQUEST:
+				WorkRequest work = (WorkRequest) content;
+				int dataSize = work.getCapacity();
+				// TODO call for data of size capacity
+				workLoad = new WorkloadPacket(data, packet.getSocketAddress(),
+						this);
+				break;
+			// TODO
 			case PacketContent.PING_RESPONSE:
 				connectionList.confirmPing(packet.getSocketAddress());
 				break;
