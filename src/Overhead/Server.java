@@ -1,8 +1,11 @@
 package Overhead;
+
 import Packets.*;
+
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.SocketAddress;
 import java.net.SocketException;
 
 import tcdIO.Terminal;
@@ -12,6 +15,8 @@ public class Server extends Node {
 	private Terminal terminal;
 	private Connection connectionList;
 	private boolean pinging = false;
+	private AcknowledgeSetup ack;
+	private TerminateWork terminate;
 
 	/*
 	 * constructor gives server a terminal and a socket starting its thread
@@ -35,28 +40,22 @@ public class Server extends Node {
 	 */
 	public synchronized void onReceipt(DatagramPacket packet) {
 		PacketContent content = PacketContent.fromDatagramPacket(packet);
-		switch (content.getType()) {
+		int type = content.getType();
+		switch (type) {
 			case PacketContent.SETUP_REQUEST:
 				connectionList.addConnection(packet.getSocketAddress());
-				AcknowledgeSetup ack = new AcknowledgeSetup(this,
-						packet.getSocketAddress());
-				System.out.println(connectionList.numberOfConnections());
+				ack = new AcknowledgeSetup(this, packet.getSocketAddress());
 				ack.send();
 				break;
 			case PacketContent.PING_RESPONSE:
 				connectionList.confirmPing(packet.getSocketAddress());
 				break;
 			case PacketContent.TASK_COMPLETE:
-				DatagramPacket response = content.toDatagramPacket();
-				response.setSocketAddress(packet.getSocketAddress());
-				try {
-					this.socket.send(response);
+				for (SocketAddress workerAddress : connectionList
+						.listConnections()) {
+					terminate = new TerminateWork(this, workerAddress);
+					terminate.send();
 				}
-				catch (IOException e) {
-					e.printStackTrace();
-				}
-
-				pinging = true;
 				this.notify();
 			default:
 				break;

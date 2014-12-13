@@ -6,7 +6,8 @@ import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
-import Overhead.*;
+
+import Overhead.Client;
 
 /**
  * @author Tomas Barry
@@ -15,9 +16,7 @@ import Overhead.*;
  * 
  */
 public class WorkRequest extends PacketContent {
-	private final int capacity;
-	private InetSocketAddress srcAddress;
-	private InetSocketAddress destAddress;
+	private int capacity;
 	private boolean hasBeenSent;
 	private Timer timer;
 	private Client controller;
@@ -30,24 +29,27 @@ public class WorkRequest extends PacketContent {
 	 * @param srcAddress: workers address for the WorkRequest
 	 * @param capacity: workload that the worker can handle
 	 */
-	public WorkRequest(InetSocketAddress srcAddress,
-			InetSocketAddress destAddress, int capacity, Client client) {
+	public WorkRequest(int capacity, Client client) {
 		this.type = WORK_REQUEST;
 		this.capacity = capacity;
-		this.srcAddress = srcAddress;
 		this.hasBeenSent = false;
 		this.controller = client;
-		this.destAddress = destAddress;
 	}
 
 	/**
-	 * WorkloadPacket constructor
+	 * WorkRequest constructor
 	 * 
 	 * @param oin: ObjectInputStream that contains data about the packet
 	 */
-	//	protected WorkRequest(ObjectInputStream oin) {
-	//		// Not sure if needed yet TODO
-	//	}
+	protected WorkRequest(ObjectInputStream oin) {
+		try {
+			this.type = WORK_REQUEST;
+			this.capacity = oin.readInt();
+		}
+		catch (IOException e) {
+			System.out.println("Error in WorkRequest oin constructor");
+		}
+	}
 
 	// Methods
 	// -------------------------------------------------------------
@@ -59,7 +61,7 @@ public class WorkRequest extends PacketContent {
 	public void sendRequest() {
 		try {
 			DatagramPacket packet = this.toDatagramPacket();
-			packet.setSocketAddress(this.getDestAddress());
+			packet.setSocketAddress(this.controller.dstAddress);
 			this.controller.socket.send(packet);
 			this.timer = new Timer(this);
 		}
@@ -103,26 +105,6 @@ public class WorkRequest extends PacketContent {
 	}
 
 	/**
-	 * getDestAddress
-	 * returns the destination address of the WorkloaRequest
-	 * 
-	 * @return destAddress: the destination address of the WorkloadRequest
-	 */
-	public InetSocketAddress getDestAddress() {
-		return destAddress;
-	}
-
-	/**
-	 * getSrcAddress
-	 * returns the destination address of the WorkloadPacket
-	 * 
-	 * @return destAddress: the destination address of the WorkloadPacket
-	 */
-	public InetSocketAddress getSrcAddress() {
-		return srcAddress;
-	}
-
-	/**
 	 * hasBeenSent
 	 * returns boolean based on whether WorkRequest has been responded to
 	 * 
@@ -133,8 +115,6 @@ public class WorkRequest extends PacketContent {
 		return this.hasBeenSent;
 	}
 
-	// toStrings TODO
-	// --------------------------------------------------------------
 	/**
 	 * toString
 	 * returns status of the WorkRequest as a string
@@ -143,8 +123,7 @@ public class WorkRequest extends PacketContent {
 	 */
 	public String toString() {
 		return "Request of size " + capacity + "to "
-				+ getDestAddress().toString() + "from "
-				+ getSrcAddress().toString();
+				+ controller.DEFAULT_DST_PORT + "from " + controller.dstAddress;
 	}
 
 	/**

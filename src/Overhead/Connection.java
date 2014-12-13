@@ -1,4 +1,5 @@
 package Overhead;
+
 import Packets.*;
 import java.io.IOException;
 import java.net.SocketAddress;
@@ -81,6 +82,13 @@ public class Connection {
 		catch (IndexOutOfBoundsException e) {
 			// sometimes happens... no need to worry about it
 		}
+	}
+
+	/**
+	 * 
+	 */
+	public LinkedList<SocketAddress> listConnections() {
+		return connections;
 	}
 
 	/**

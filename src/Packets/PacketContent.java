@@ -1,4 +1,5 @@
 package Packets;
+
 import Overhead.*;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -15,8 +16,9 @@ public abstract class PacketContent {
 	public static final int PING_REQUEST = 2;
 	public static final int PING_RESPONSE = 3;
 	public static final int WORK_REQUEST = 4;
-	public static final int TASK_COMPLETE = 5;
-	public static final int END_ALL_WORK = 6;
+	public static final int WORKLOAD_PACKET = 5;
+	public static final int TASK_COMPLETE = 6;
+	public static final int END_ALL_WORK = 7;
 	protected int type = 0;
 
 	/**

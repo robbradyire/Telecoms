@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.SocketException;
 
-import Packets.*;
+import Packets.SucessPacket;
+
+import com.sun.glass.ui.Timer;
 
 /**
  * ProcessData
@@ -16,6 +18,8 @@ public class ProcessData {
 	private String[] data;
 	private String target;
 	private boolean targetFound;
+
+	//	private Thread processingThread; ... maybe
 
 	/**
 	 * ProcessData constructor
@@ -29,22 +33,33 @@ public class ProcessData {
 	}
 
 	/**
+	 * 
+	 */
+	public void sendSucessPacket(Client worker) {
+		SucessPacket sucessPacket = new SucessPacket(worker);
+		sucessPacket.send();
+	}
+
+	/**
 	 * processTheData
 	 * searches the data for the target
 	 * 
 	 * @param worker
 	 * 
-	 * @return 0: data doesn't contain target
-	 * @return 1: data does contain target
+	 * @return false: data doesn't contain target
+	 * @return true: data does contain target
 	 */
-	public int processTheData(Client worker) {
+	public boolean processTheData(Client worker) {
+		//		processingThread = new Thread();
+		//		processingThread.start(); ... maybe...
 		for (String s : data) {
 			if (s.equals(getTarget())) {
 				targetFound = true;
-				return 1;
+				sendSucessPacket(worker);
+				return true;
 			}
 		}
-		return 0;
+		return false;
 	}
 
 	/**

@@ -13,12 +13,16 @@ import tcdIO.Terminal;
  * Client class An instance accepts user input
  */
 public class Client extends Node {
-	private static final int DEFAULT_DST_PORT = 50001;
+	public static final int DEFAULT_DST_PORT = 50001;
 	private static final String DEFAULT_DST_NODE = "localhost";
 	private Terminal terminal;
 	public InetSocketAddress dstAddress;
+	private boolean targetFound = false;
 	private SetupPacket setupRequest;
 	private SucessPacket sucessPacket;
+	private WorkRequest workRequest;
+	private PingResponse ping;
+	private ProcessData leDataProcessor;
 
 	/**
 	 * Constructor Attempts to create socket at given port and create an
@@ -39,18 +43,26 @@ public class Client extends Node {
 	 */
 	public synchronized void onReceipt(DatagramPacket packet) {
 		PacketContent content = PacketContent.fromDatagramPacket(packet);
-		switch (content.getType()) {
+		int type = content.getType();
+		switch (type) {
 			case PacketContent.SETUP_ACK:
 				setupRequest.confirmRequest();
 				this.notify();
 				break;
 			case PacketContent.PING_REQUEST:
-				PingResponse ping = new PingResponse(this);
 				terminal.println("Sending ping response");
+				ping = new PingResponse(this);
 				ping.send();
 				break;
-			default:
+			case PacketContent.WORKLOAD_PACKET:
+				leDataProcessor = new ProcessData(
+						(WorkloadPacket) content.getData(),
+						(WorkloadPacket) content.getTarget());
+				leDataProcessor.processTheData(this);
 				this.notify();
+				break;
+			case PacketContent.END_ALL_WORK:
+				targetFound = true;
 				break;
 		}
 	}
@@ -62,18 +74,12 @@ public class Client extends Node {
 		setupRequest = new SetupPacket(this);
 		setupRequest.sendRequest();
 		this.wait();
-		String dataString = "john smith\ndavid smith\nmichael smith"
-				+ "\nchris smith\nmike smith\narun kumar\njames smith\n"
-				+ "namit kumar\nimran khan\njason smith\nchris johnson\n"
-				+ "jessica smith\nchris brown\nmike jones\nmichael johnson\n"
-				+ "mark smith\nsarah smith\nanil kumar\nmanoj kumar\n";
-		byte[] data = dataString.getBytes();
-		ProcessData process = new ProcessData(data, "sarah smith");
-		int sucess = process.processTheData(this);
-		sucessPacket = new SucessPacket(this);
-		this.wait();
-		sucessPacket.send();
-		this.wait();
+		int capacity = 100;
+		while (!targetFound) {
+			workRequest = new WorkRequest(capacity, this);
+			workRequest.sendRequest();
+			this.wait();
+		}
 	}
 
 	/**
