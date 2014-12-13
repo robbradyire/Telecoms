@@ -6,8 +6,13 @@ import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
-import Overhead.*;
 
+import Overhead.*;
+/**
+ * 
+ * @author Tomas Barry & Calvin Nolan.
+ *
+ */
 public class WorkloadPacket extends PacketContent {
 	private byte[] data;
 	private Server controller;
@@ -25,7 +30,7 @@ public class WorkloadPacket extends PacketContent {
 	public WorkloadPacket(byte[] data, InetSocketAddress destAddress,
 			Server server) {
 		this.data = data;
-		this.type = PING_REQUEST;
+		this.type = WORKLOAD_PACKET;
 		this.destAddress = destAddress;
 		this.controller = server;
 	}
@@ -36,7 +41,13 @@ public class WorkloadPacket extends PacketContent {
 	 * @param oin: ObjectInputStream that contains data about the packet
 	 */
 	protected WorkloadPacket(ObjectInputStream oin) {
-		// Not sure if needed yet
+		try {
+			this.type = WORKLOAD_PACKET;
+			this.data = new byte[oin.available()];
+			oin.read(data);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	// Methods
@@ -52,22 +63,24 @@ public class WorkloadPacket extends PacketContent {
 			packet.setSocketAddress(this.getDestAddress());
 			this.controller.socket.send(packet);
 		}
-		catch (SocketException e) {
-			// no action
-		}
-		catch (IOException e) {
-			// no action
+		catch (Exception e) {
+			System.err.println("Error: " + e.getMessage());
 		}
 	}
 
 	/**
-	 * tooObjectOutputStream
+	 * toObjectOutputStream
 	 * writes content into an ObjectOutputStream
 	 * 
 	 * @param out: output stream to write
 	 */
 	protected void toObjectOutputStream(ObjectOutputStream out) {
-		// not sure if needed
+		try {
+			this.type = WORKLOAD_PACKET;
+			out.write(data);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	// Getters
@@ -98,7 +111,7 @@ public class WorkloadPacket extends PacketContent {
 	 * toString
 	 * returns the data in the packet as String
 	 * 
-	 * @return "John Don"
+	 * @return names in the byte array in string form.
 	 */
 	public String toString() {
 		return new String(this.data);
