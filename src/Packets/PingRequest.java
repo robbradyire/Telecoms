@@ -142,8 +142,7 @@ public class PingRequest extends PacketContent {
 			try {
 				Thread.sleep(this.sleepTime);
 				if (!((PingRequest) this.packet).hasBeenSent()) {
-					System.out.println("Ping resent");
-					((PingRequest) this.packet).send();
+					// i dunno
 				}
 			}
 			catch (Exception e) {

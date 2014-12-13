@@ -1,6 +1,7 @@
 package Overhead;
 
 import Packets.*;
+
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.net.SocketException;
@@ -16,6 +17,7 @@ public class Connection {
 	private Server controller;
 	private LinkedList<SocketAddress> connections; // list of clients
 	private LinkedList<PingRequest> pingList;
+	private LinkedList<Integer> pingCounts;
 
 	/**
 	 * Constructor
@@ -23,6 +25,7 @@ public class Connection {
 	public Connection(Server controller) {
 		this.controller = controller;
 		connections = new LinkedList<SocketAddress>();
+		pingCounts = new LinkedList<Integer>();
 	}
 
 	/**
@@ -33,6 +36,7 @@ public class Connection {
 	 */
 	public void addConnection(SocketAddress clientSocket) {
 		connections.add(clientSocket);
+		pingCounts.add((Integer) 0);
 	}
 
 	/**
@@ -51,16 +55,38 @@ public class Connection {
 	 * 
 	 * @throws IOException
 	 * @throws SocketException
+	 * @throws InterruptedException 
 	 * 
 	 */
-	public void ping() throws SocketException, IOException {
+	public synchronized void ping() throws SocketException, IOException, InterruptedException {
 		PingRequest ping;
 		pingList = new LinkedList<PingRequest>();
+		// make a copy of the connections to iterate through
+		LinkedList<SocketAddress> connectionsCopy = new LinkedList<SocketAddress>();
 		for (SocketAddress client : connections) {
-			ping = new PingRequest(client, controller);
-			pingList.add(ping);
-			ping.send();
+			connectionsCopy.add(client);
 		}
+		
+		int i = 0;
+		for (SocketAddress client : connectionsCopy) {
+			if ((int) pingCounts.get(i) < 5) {
+				ping = new PingRequest(client, controller);
+				pingList.add(ping);
+				ping.send();
+				this.wait(50);
+				
+				int count = (int) pingCounts.get(i);
+				count += 1;
+				System.out.println("Count: " + count);
+				pingCounts.set(i, (Integer) count);
+				i += 1;
+			} else {
+				System.out.println("Removing connection.");
+				connections.remove(i);
+				pingCounts.remove(i);
+			}
+		}
+		System.out.println("\n");
 	}
 
 	/**
@@ -75,6 +101,7 @@ public class Connection {
 			for (SocketAddress s : connections) {
 				if (s.equals(client)) {
 					pingList.remove(i).confirmPing();
+					pingCounts.set(i, (Integer) 0);
 				}
 				i++;
 			}
