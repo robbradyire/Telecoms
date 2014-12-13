@@ -35,7 +35,13 @@ public class TerminateWork extends PacketContent {
 	 * @param oin: ObjectInputStream that contains data about the packet
 	 */
 	protected TerminateWork(ObjectInputStream oin) {
-		this.type = END_ALL_WORK;
+		try{
+			this.type = END_ALL_WORK;
+			this.controller = (Server) oin.readObject();
+			this.dstAddress = (SocketAddress) oin.readObject();
+		} catch(Exception e){
+			e.printStackTrace();
+		}
 		
 	}
 	
@@ -70,7 +76,14 @@ public class TerminateWork extends PacketContent {
 	}
 	
 	protected void toObjectOutputStream(ObjectOutputStream out) {
-		// nothing to write
+		try{
+			this.type = END_ALL_WORK;
+			out.writeObject(controller);
+			out.writeObject(dstAddress);
+			
+		}catch(Exception e){
+			e.printStackTrace();
+		}
 		
 	}
 	

@@ -1,9 +1,11 @@
 package Packets;
 import Overhead.*;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
+import java.net.InetSocketAddress;
 import java.net.SocketException;
 
 /**
@@ -34,7 +36,14 @@ public class SetupPacket extends PacketContent {
 	 * @param oin: ObjectInputStream that contains data about the packet
 	 */
 	protected SetupPacket(ObjectInputStream oin) {
-		this.type = SETUP_REQUEST;
+		try {
+			this.type = SETUP_REQUEST;
+			this.controller = (Client) oin.readObject();
+			this.hasBeenSent = oin.readBoolean();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
 	}
 
 	/**
@@ -64,7 +73,14 @@ public class SetupPacket extends PacketContent {
 	 * @param out: output stream to write
 	 */
 	protected void toObjectOutputStream(ObjectOutputStream out) {
-		// nothing to write
+
+		try {
+			this.type = WORKLOAD_PACKET;
+			out.writeObject(controller);
+			out.writeBoolean(hasBeenSent);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**

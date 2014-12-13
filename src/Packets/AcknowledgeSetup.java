@@ -1,9 +1,11 @@
 package Packets;
 import Overhead.*;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.SocketException;
 
@@ -36,7 +38,13 @@ public class AcknowledgeSetup extends PacketContent {
 	 * @param oin: ObjectInputStream that contains data about the packet
 	 */
 	public AcknowledgeSetup(ObjectInputStream oin) {
-		this.type = SETUP_ACK;
+		try{
+			this.type = SETUP_ACK;
+			this.controller = (Server) oin.readObject();
+			this.dstAddress = (InetSocketAddress) oin.readObject();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -65,7 +73,13 @@ public class AcknowledgeSetup extends PacketContent {
 	 * @param out: output stream to write
 	 */
 	protected void toObjectOutputStream(ObjectOutputStream out) {
-		// nothing to write
+		try {
+			this.type = SETUP_ACK;
+			out.writeObject(controller);
+			out.writeObject(dstAddress);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**
