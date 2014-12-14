@@ -1,5 +1,4 @@
 package Packets;
-
 import Overhead.*;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -8,22 +7,19 @@ import java.net.DatagramPacket;
 import java.net.SocketAddress;
 import java.net.SocketException;
 
+
 /**
  * @author Tomas Barry
  * 
  *         PingRequest
- *         Sent from the Server to a Worker. It tells the Worker that it must
- *         return a PingResponse to let the Server know that it is still active
+ *         Controlled by the Connection class object for the Server
  * 
  */
 public class PingRequest extends PacketContent {
-	private Server server;
-	private SocketAddress workerAddress;
+	private Server controller;
+	private SocketAddress destAddress;
 	private Timer timer;
 	private boolean pinged;
-
-	// Constructors
-	// -------------------------------------------------------------------
 
 	/**
 	 * PingRequest constructor
@@ -33,8 +29,8 @@ public class PingRequest extends PacketContent {
 	 */
 	public PingRequest(SocketAddress client, Server server) {
 		this.type = PING_REQUEST;
-		this.workerAddress = client;
-		this.server = server;
+		this.destAddress = client;
+		this.controller = server;
 		this.pinged = false;
 	}
 
@@ -47,19 +43,16 @@ public class PingRequest extends PacketContent {
 		this.type = PING_REQUEST;
 	}
 
-	// Methods
-	// ------------------------------------------------------------------
-
 	/**
 	 * send
-	 * sends a PingRequest to the worker and starts the Timer
+	 * sends a PingRequest to the worker and starts the timer
 	 * 
 	 */
 	public void send() {
 		try {
 			DatagramPacket packet = this.toDatagramPacket();
 			packet.setSocketAddress(this.getDestAddress());
-			this.server.socket.send(packet);
+			this.controller.socket.send(packet);
 			this.timer = new Timer(this);
 		}
 		catch (SocketException e) {
@@ -82,16 +75,13 @@ public class PingRequest extends PacketContent {
 
 	/**
 	 * confirmPing
-	 * Called by the Servers Connection. Indicates that PingRequest
+	 * Called by the controllers Connection. Indicates that PingRequest
 	 * has been responded to and stops the timer
 	 */
 	public void confirmPing() {
 		this.pinged = true;
 		this.timer.killThread();
 	}
-
-	// Getters
-	// -------------------------------------------------------------
 
 	/**
 	 * getDestAddress
@@ -100,7 +90,7 @@ public class PingRequest extends PacketContent {
 	 * @return destAddress: the destination address of the ping
 	 */
 	public SocketAddress getDestAddress() {
-		return workerAddress;
+		return destAddress;
 	}
 
 	/**
@@ -114,8 +104,6 @@ public class PingRequest extends PacketContent {
 		return this.pinged;
 	}
 
-	// toString
-	// ------------------------------------------------------------------------
 	/**
 	 * toString
 	 * returns status of ping as a string

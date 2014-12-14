@@ -1,46 +1,38 @@
 package Packets;
 
+import Overhead.*;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
+import java.net.InetSocketAddress;
 import java.net.SocketException;
 
-import Overhead.Client;
-
 /**
+ * PingResponse
  * 
  * @author Tomas Barry
  * 
- *         PingResponse
- *         Sent by the Worker in response to a PingRequest to let the Server
- *         know that it is still an active Worker
  */
 public class PingResponse extends PacketContent {
-	private Client worker;
-
-	// Constructors
-	// -----------------------------------------------------------
+	private Client controller;
 
 	/**
-	 * PingResponse constructor
+	 * constructor
 	 */
-	public PingResponse(Client worker) {
+	public PingResponse(Client responder) {
 		this.type = PING_RESPONSE;
-		this.worker = worker;
+		this.controller = responder;
 	}
 
 	/**
-	 * PingResponse constructor
+	 * PingRequest constructor
 	 * 
 	 * @param oin: ObjectInputStream that contains data about the packet
 	 */
 	protected PingResponse(ObjectInputStream oin) {
 		this.type = PING_RESPONSE;
 	}
-
-	// Methods
-	// -----------------------------------------------------------------
 
 	/**
 	 * send
@@ -52,8 +44,8 @@ public class PingResponse extends PacketContent {
 	public void send() {
 		try {
 			DatagramPacket packet = this.toDatagramPacket();
-			packet.setSocketAddress(worker.dstAddress);
-			this.worker.socket.send(packet);
+			packet.setSocketAddress(this.getDestAddress());
+			this.controller.socket.send(packet);
 		}
 		catch (SocketException e) {
 			// no action
@@ -61,6 +53,15 @@ public class PingResponse extends PacketContent {
 		catch (IOException e) {
 			// no action
 		}
+	}
+
+	/**
+	 * TODO
+	 * 
+	 * @return
+	 */
+	public InetSocketAddress getDestAddress() {
+		return this.controller.dstAddress;
 	}
 
 	/**
@@ -73,18 +74,10 @@ public class PingResponse extends PacketContent {
 		// nothing to write
 	}
 
-	// toString
-	// -------------------------------------------------------
-
-	/**
-	 * toString
-	 * returns a String representation of the status of the PingResponse
-	 * 
-	 * @return "Response Ping from x to y";
-	 */
+	@Override
 	public String toString() {
-		return "Response Ping from " + worker.toString() + " to "
-				+ worker.dstAddress;
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

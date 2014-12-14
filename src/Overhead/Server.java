@@ -18,7 +18,6 @@ public class Server extends Node {
 	private AcknowledgeSetup ack;
 	private WorkloadPacket workLoad;
 	private TerminateWork terminate;
-	private String targetName;
 
 	/*
 	 * constructor gives server a terminal and a socket starting its thread
@@ -46,17 +45,15 @@ public class Server extends Node {
 		switch (type) {
 			case PacketContent.SETUP_REQUEST:
 				connectionList.addConnection(packet.getSocketAddress());
-				ack = new AcknowledgeSetup(this, packet.getSocketAddress(),
-						targetName);
+				ack = new AcknowledgeSetup(this, packet.getSocketAddress());
 				ack.send();
 				break;
 			case PacketContent.WORK_REQUEST:
 				WorkRequest work = (WorkRequest) content;
 				int dataSize = work.getCapacity();
 				// TODO call for data of size capacity
-				workLoad = new WorkloadPacket(
-						(new DataAllocator().getBytes(dataSize)),
-						packet.getSocketAddress(), this);
+				workLoad = new WorkloadPacket(data, packet.getSocketAddress(),
+						this);
 				break;
 			// TODO
 			case PacketContent.PING_RESPONSE:
