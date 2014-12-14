@@ -165,4 +165,17 @@ public class DataAllocator {
 		else
 			return false;
 	}
+	
+
+	// Getter
+	// -------------------------------------------------------------
+	
+	/**
+	 * 
+	 * @return The total number of names to be processed.
+	 */
+	public int getNoOfNames()
+	{
+		return fileString.length;
+	}
 }
