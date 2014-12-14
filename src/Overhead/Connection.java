@@ -10,7 +10,7 @@ import java.util.LinkedList;
 /**
  * TODO
  * 
- * @author Tomas Barry
+ * @author Tomas Barry and Robert Brady
  * 
  */
 public class Connection {
@@ -73,7 +73,6 @@ public class Connection {
 				ping = new PingRequest(client, controller);
 				pingList.add(ping);
 				ping.send();
-				this.wait(50);
 				
 				int count = (int) pingCounts.get(i);
 				count += 1;
@@ -93,7 +92,7 @@ public class Connection {
 	 * confirmPing
 	 * confirm the receipt of a PingResponse
 	 * 
-	 * TODO
+	 * 
 	 */
 	public void confirmPing(SocketAddress client) {
 		int i = 0;
