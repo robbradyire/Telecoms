@@ -17,6 +17,7 @@ public class Client extends Node {
 	private static final String DEFAULT_DST_NODE = "localhost";
 	private Terminal terminal;
 	public InetSocketAddress dstAddress;
+	private String targetName;
 	private boolean targetFound = false;
 	private SetupPacket setupRequest;
 	private SucessPacket sucessPacket;
@@ -47,6 +48,7 @@ public class Client extends Node {
 		switch (type) {
 			case PacketContent.SETUP_ACK:
 				setupRequest.confirmRequest();
+				targetName = ((AcknowledgeSetup) content).getTarget();
 				this.notify();
 				break;
 			case PacketContent.PING_REQUEST:
@@ -56,8 +58,7 @@ public class Client extends Node {
 				break;
 			case PacketContent.WORKLOAD_PACKET:
 				leDataProcessor = new ProcessData(
-						(WorkloadPacket) content.getData(),
-						(WorkloadPacket) content.getTarget());
+						((WorkloadPacket) content).getData(), targetName);
 				leDataProcessor.processTheData(this);
 				this.notify();
 				break;

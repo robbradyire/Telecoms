@@ -1,4 +1,5 @@
 package Packets;
+
 import Overhead.*;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -9,14 +10,18 @@ import java.net.SocketException;
 /**
  * @author Tomas Barry
  * 
- *         WorkRequest
- * 
+ *         SucessPacket
+ *         Sent from a Worker to the Server to indicate that it has complete the
+ *         task assigned by the Server. It expects a TerminateWork packet in
+ *         response otherwise it will continue to sent the SucessPacket
  */
 public class SucessPacket extends PacketContent {
 	private boolean hasBeenSent;
 	private Timer timer;
-	private Client controller;
+	private Client worker;
 
+	// Constructors
+	// -------------------------------------------------------------
 	/**
 	 * SucessPacket constructor
 	 * 
@@ -25,7 +30,7 @@ public class SucessPacket extends PacketContent {
 	public SucessPacket(Client client) {
 		this.type = TASK_COMPLETE;
 		this.hasBeenSent = false;
-		this.controller = client;
+		this.worker = client;
 	}
 
 	/**
@@ -37,6 +42,8 @@ public class SucessPacket extends PacketContent {
 		this.type = TASK_COMPLETE;
 	}
 
+	// Methods
+	// ---------------------------------------------------------------------
 	/**
 	 * send
 	 * sends a message to the Server to let it know that the Client has
@@ -44,10 +51,10 @@ public class SucessPacket extends PacketContent {
 	 * 
 	 */
 	public void send() {
-		DatagramPacket packet = this.toDatagramPacket();
 		try {
-			packet.setSocketAddress(this.controller.dstAddress);
-			this.controller.socket.send(packet);
+			DatagramPacket packet = this.toDatagramPacket();
+			packet.setSocketAddress(this.worker.dstAddress);
+			this.worker.socket.send(packet);
 			this.timer = new Timer(this);
 		}
 		catch (SocketException e) {
@@ -77,6 +84,9 @@ public class SucessPacket extends PacketContent {
 		this.timer.killThread();
 	}
 
+	// Getters
+	// ----------------------------------------------------------------------
+
 	/**
 	 * hasBeenSent
 	 * returns boolean based on whether SucessPacket has been responded to
@@ -88,16 +98,18 @@ public class SucessPacket extends PacketContent {
 		return this.hasBeenSent;
 	}
 
+	// toString
+	// ----------------------------------------------------------------------
 	/**
 	 * toString
 	 * returns status of the SetupRequest as a string
 	 * 
-	 * @return Setup request from x has been acknowledged
-	 * @return Setup request from x has not been acknowledged
+	 * @return SucessPacket from x has been acknowledged
+	 * @return SucessPacket from x has not been acknowledged
 	 */
 	public String toString() {
-		return "";
-		// TODO
+		return "SucessPacket from " + worker.socket.toString() + " has "
+				+ (hasBeenSent() ? " been" : " not been") + " acknowledged";
 	}
 
 	/**

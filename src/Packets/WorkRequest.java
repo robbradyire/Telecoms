@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
-import java.net.InetSocketAddress;
 import java.net.SocketException;
 
 import Overhead.Client;
@@ -14,26 +13,30 @@ import Overhead.Client;
  * 
  *         WorkRequest
  * 
+ *         Sent by the Workers to the Server to request a WorkloadPacket of a
+ *         specific size. It has a built in Timer that will re send the
+ *         WorkRequest if the Server does not return a WorkloadPacket in time
+ * 
  */
 public class WorkRequest extends PacketContent {
 	private int capacity;
 	private boolean hasBeenSent;
 	private Timer timer;
-	private Client controller;
+	private Client worker;
 
-	// Constructor
+	// Constructors
 	// -------------------------------------------------------------
 	/**
 	 * WorkRequest constructor
 	 * 
-	 * @param srcAddress: workers address for the WorkRequest
 	 * @param capacity: workload that the worker can handle
+	 * @param client: reference to the worker who is sending the packet
 	 */
 	public WorkRequest(int capacity, Client client) {
 		this.type = WORK_REQUEST;
 		this.capacity = capacity;
 		this.hasBeenSent = false;
-		this.controller = client;
+		this.worker = client;
 	}
 
 	/**
@@ -61,8 +64,8 @@ public class WorkRequest extends PacketContent {
 	public void sendRequest() {
 		try {
 			DatagramPacket packet = this.toDatagramPacket();
-			packet.setSocketAddress(this.controller.dstAddress);
-			this.controller.socket.send(packet);
+			packet.setSocketAddress(this.worker.dstAddress);
+			this.worker.socket.send(packet);
 			this.timer = new Timer(this);
 		}
 		catch (SocketException e) {
@@ -79,8 +82,13 @@ public class WorkRequest extends PacketContent {
 	 * 
 	 * @param out: output stream to write
 	 */
-	protected void toObjectOutputStream(ObjectOutputStream out) {
-		// not sure if needed
+	protected void toObjectOutputStream(ObjectOutputStream oout) {
+		try {
+			oout.write(capacity);
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -94,6 +102,7 @@ public class WorkRequest extends PacketContent {
 
 	// Getters
 	// --------------------------------------------------------------
+
 	/**
 	 * getCapacity
 	 * returns the capacity that the worker has requested
@@ -115,6 +124,9 @@ public class WorkRequest extends PacketContent {
 		return this.hasBeenSent;
 	}
 
+	// toString
+	// ------------------------------------------------------------------------
+
 	/**
 	 * toString
 	 * returns status of the WorkRequest as a string
@@ -122,8 +134,8 @@ public class WorkRequest extends PacketContent {
 	 * @return "Request of size n to x from y"
 	 */
 	public String toString() {
-		return "Request of size " + capacity + "to "
-				+ controller.DEFAULT_DST_PORT + "from " + controller.dstAddress;
+		return "Request of size " + getCapacity() + "to "
+				+ worker.DEFAULT_DST_PORT + "from " + worker.dstAddress;
 	}
 
 	/**

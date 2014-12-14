@@ -1,22 +1,28 @@
 package Packets;
-import Overhead.*;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
 import java.net.SocketException;
 
+import Overhead.Client;
+
 /**
  * @author Tomas Barry
  * 
  *         WorkRequest
+ *         Sent from a Worker to the Server requesting permission to join the
+ *         list of Workers and begin requesting WorkloadPackets
  * 
  */
 public class SetupPacket extends PacketContent {
 	private boolean hasBeenSent;
 	private Timer timer;
-	private Client controller;
+	private Client worker;
 
+	// Constructors
+	// ------------------------------------------------------------
 	/**
 	 * SetupPacket constructor
 	 * 
@@ -25,7 +31,7 @@ public class SetupPacket extends PacketContent {
 	public SetupPacket(Client client) {
 		this.type = SETUP_REQUEST;
 		this.hasBeenSent = false;
-		this.controller = client;
+		this.worker = client;
 	}
 
 	/**
@@ -37,16 +43,18 @@ public class SetupPacket extends PacketContent {
 		this.type = SETUP_REQUEST;
 	}
 
+	// Methods
+	// ------------------------------------------------------------
 	/**
 	 * send
-	 * sends a request to set up a connection to the Server and start the timer
+	 * sends a request to set up a connection to the Server and start the Timer
 	 * 
 	 */
 	public void sendRequest() {
 		try {
 			DatagramPacket packet = this.toDatagramPacket();
-			packet.setSocketAddress(this.controller.dstAddress);
-			this.controller.socket.send(packet);
+			packet.setSocketAddress(this.worker.dstAddress);
+			this.worker.socket.send(packet);
 			this.timer = new Timer(this);
 		}
 		catch (SocketException e) {
@@ -69,12 +77,15 @@ public class SetupPacket extends PacketContent {
 
 	/**
 	 * confirmRequest
-	 * Indicates that SetupRequest has been responded to and stops the timer
+	 * Indicates that SetupRequest has been responded to and stops the Timer
 	 */
 	public void confirmRequest() {
 		this.hasBeenSent = true;
 		this.timer.killThread();
 	}
+
+	// Getters
+	// -----------------------------------------------------------------
 
 	/**
 	 * hasBeenSent
@@ -84,8 +95,11 @@ public class SetupPacket extends PacketContent {
 	 * @return false: if WorkRequest not yet responded to
 	 */
 	public boolean hasBeenSent() {
-		return this.hasBeenSent;
+		return hasBeenSent;
 	}
+
+	// toString
+	// ----------------------------------------------------------------
 
 	/**
 	 * toString
@@ -95,7 +109,7 @@ public class SetupPacket extends PacketContent {
 	 * @return Setup request from x has not been acknowledged
 	 */
 	public String toString() {
-		return "Setup request from " + controller.socket.toString() + " has "
+		return "Setup request from " + worker.socket.toString() + " has "
 				+ (hasBeenSent() ? " been" : " not been") + " acknowledged";
 	}
 
