@@ -23,6 +23,7 @@ public class Client extends Node {
 	private WorkRequest workRequest;
 	private PingResponse ping;
 	private ProcessData leDataProcessor;
+	private String target;
 
 	/**
 	 * Constructor Attempts to create socket at given port and create an
@@ -56,8 +57,7 @@ public class Client extends Node {
 				break;
 			case PacketContent.WORKLOAD_PACKET:
 				leDataProcessor = new ProcessData(
-						(WorkloadPacket) content.getData(),
-						(WorkloadPacket) content.getTarget());
+						((WorkloadPacket) content).getData(), target);
 				leDataProcessor.processTheData(this);
 				this.notify();
 				break;
