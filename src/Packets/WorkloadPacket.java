@@ -1,42 +1,44 @@
 package Packets;
 
-import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
-import java.net.InetSocketAddress;
-import java.net.SocketException;
+import java.net.SocketAddress;
 
-import Overhead.*;
+import Overhead.Server;
+
 /**
  * 
- * @author Tomas Barry & Calvin Nolan.
- *
+ * @author Tomas Barry & Calvin Nolan
+ * 
+ *         WorkloadPacket
+ * 
+ *         Sent from the Server in response to a WorkRequest from a Worker
+ * 
  */
 public class WorkloadPacket extends PacketContent {
 	private byte[] data;
-	private Server controller;
-	private InetSocketAddress destAddress;
+	private Server server;
+	private SocketAddress workerAddress;
 
-	// Constructor
+	// Constructors
 	// -------------------------------------------------------------
 	/**
 	 * WorkloadPacket constructor
 	 * 
 	 * @param data: byte array of byte arrays represents data to be sent
-	 * @param destAddress: workers address for the PingRequest
+	 * @param destAddress: workers address for the WorkloadPacket
 	 * @param server: Server reference to enable send method in this class
 	 */
-	public WorkloadPacket(byte[] data, InetSocketAddress destAddress,
-			Server server) {
+	public WorkloadPacket(byte[] data, SocketAddress destAddress, Server server) {
 		this.data = data;
 		this.type = WORKLOAD_PACKET;
-		this.destAddress = destAddress;
-		this.controller = server;
+		this.workerAddress = destAddress;
+		this.server = server;
 	}
 
 	/**
-	 * PingRequest constructor
+	 * WorkloadPacket constructor
 	 * 
 	 * @param oin: ObjectInputStream that contains data about the packet
 	 */
@@ -45,7 +47,8 @@ public class WorkloadPacket extends PacketContent {
 			this.type = WORKLOAD_PACKET;
 			this.data = new byte[oin.available()];
 			oin.read(data);
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -61,7 +64,7 @@ public class WorkloadPacket extends PacketContent {
 		try {
 			DatagramPacket packet = this.toDatagramPacket();
 			packet.setSocketAddress(this.getDestAddress());
-			this.controller.socket.send(packet);
+			this.server.socket.send(packet);
 		}
 		catch (Exception e) {
 			System.err.println("Error: " + e.getMessage());
@@ -78,7 +81,8 @@ public class WorkloadPacket extends PacketContent {
 		try {
 			this.type = WORKLOAD_PACKET;
 			out.write(data);
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -87,12 +91,12 @@ public class WorkloadPacket extends PacketContent {
 	// --------------------------------------------------------------
 	/**
 	 * getDestAddress
-	 * returns the destination address of the ping
+	 * returns the destination address of the WorkloadPacket
 	 * 
 	 * @return destAddress: the destination address of the workload
 	 */
-	public InetSocketAddress getDestAddress() {
-		return destAddress;
+	public SocketAddress getDestAddress() {
+		return workerAddress;
 	}
 
 	/**
@@ -102,7 +106,7 @@ public class WorkloadPacket extends PacketContent {
 	 * @return data: byte array containing the data
 	 */
 	public byte[] getData() {
-		return this.data;
+		return data;
 	}
 
 	// toStrings
@@ -114,6 +118,6 @@ public class WorkloadPacket extends PacketContent {
 	 * @return names in the byte array in string form.
 	 */
 	public String toString() {
-		return new String(this.data);
+		return new String(data);
 	}
 }
