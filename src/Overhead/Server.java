@@ -18,12 +18,15 @@ public class Server extends Node {
 	private AcknowledgeSetup ack;
 	private WorkloadPacket workLoad;
 	private TerminateWork terminate;
+	private DataAllocator dataAllocator;
 
 	/*
 	 * constructor gives server a terminal and a socket starting its thread
 	 */
 	Server(Terminal terminal, int port) {
 		try {
+
+			this.dataAllocator = new DataAllocator();
 			this.terminal = terminal;
 			this.socket = new DatagramSocket(port);
 			this.listener.go();
@@ -51,7 +54,7 @@ public class Server extends Node {
 			case PacketContent.WORK_REQUEST:
 				WorkRequest work = (WorkRequest) content;
 				int dataSize = work.getCapacity();
-				// TODO call for data of size capacity
+				byte[] data = dataAllocator.getBytes(dataSize);
 				workLoad = new WorkloadPacket(data, packet.getSocketAddress(),
 						this);
 				break;
