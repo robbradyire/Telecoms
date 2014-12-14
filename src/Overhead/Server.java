@@ -15,7 +15,6 @@ public class Server extends Node {
 	private Terminal terminal;
 	private Connection connectionList;
 	private boolean pinging = false;
-	private String target  = "Justin Beiber";
 	private AcknowledgeSetup ack;
 	private WorkloadPacket workLoad;
 	private TerminateWork terminate;
@@ -46,16 +45,17 @@ public class Server extends Node {
 		switch (type) {
 			case PacketContent.SETUP_REQUEST:
 				connectionList.addConnection(packet.getSocketAddress());
-				ack = new AcknowledgeSetup(this, packet.getSocketAddress(),
-						target);
+				ack = new AcknowledgeSetup(this, packet.getSocketAddress());
 				ack.send();
 				break;
 			case PacketContent.WORK_REQUEST:
 				WorkRequest work = (WorkRequest) content;
-				workLoad = new WorkloadPacket(
-						(new DataAllocator()).getBytes(work.getCapacity()),
-						packet.getSocketAddress(), this);
+				int dataSize = work.getCapacity();
+				// TODO call for data of size capacity
+				workLoad = new WorkloadPacket(data, packet.getSocketAddress(),
+						this);
 				break;
+			// TODO
 			case PacketContent.PING_RESPONSE:
 				connectionList.confirmPing(packet.getSocketAddress());
 				break;
