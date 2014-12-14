@@ -21,8 +21,8 @@ public class Statistics {
 	private Server controller;
 	private int numberOfWorkers;
 	private ArrayList<Integer> numberOfNamesSearched;
-	private ArrayList<Timer> timers;
-	private ArrayList<Integer> timeSpent;
+	private ArrayList<Stopwatch> timers;
+	private ArrayList<Double> timeSpent;
 	private int namesSearchedTotal;
 	private double percentOfWorkDone;
 	private int namesToSearch;
@@ -37,8 +37,8 @@ public class Statistics {
 		this.controller = server;
 		this.numberOfWorkers = 0;
 		this.numberOfNamesSearched = new ArrayList<Integer>();
-		this.timers = new ArrayList<Timer>();
-		this.timeSpent = new ArrayList<Integer>();
+		this.timers = new ArrayList<Stopwatch>();
+		this.timeSpent = new ArrayList<Double>();
 		this.namesSearchedTotal = 0;
 		this.percentOfWorkDone = 0.0;
 		
@@ -55,9 +55,8 @@ public class Statistics {
 	public int addWorker() {
 		int id = numberOfWorkers;
 		numberOfNamesSearched.add(0);
-		timers.add(new Timer());
-		timers.get(id).run();
-		timeSpent.add(0);
+		timers.add(new Stopwatch());
+		timeSpent.add(0.0);
 		numberOfWorkers++;
 		
 		return id;
@@ -73,7 +72,8 @@ public class Statistics {
 	public void updateStats(int id, int namesSearched) {
 		numberOfNamesSearched.set(id, 
 				((int)numberOfNamesSearched.get(id)) + namesSearched);
-		timers.get(id).killThread();
+		double time = (double) timers.get(id).elapsedTime();
+		timeSpent.set(id, ((double)timeSpent.get(id) + time));
 		namesSearchedTotal += namesSearched;
 		percentOfWorkDone += (double) namesSearched / (double) namesToSearch;
 	}
@@ -85,7 +85,7 @@ public class Statistics {
 	 * @param id of the Worker
 	 */
 	public void resumeWorker(int id) {
-		timers.get(id).run();
+		timers.set(id, new Stopwatch());
 	}
 	
 	
@@ -108,38 +108,18 @@ public class Statistics {
 		return percentOfWorkDone;
 	}
 	
-	
 	/**
-	 * Timer
+	 * totalTime()
+	 * Adds up all of the time that the individual workers have spent
+	 * and returns it (in seconds)
+	 * 
+	 * @return the total time spent on the job
 	 */
-	private class Timer extends AbstractTimer {
-		public Timer() {
-			this.thread = new Thread(this);
+	public double totalTime() {
+		double total = 0.0;
+		for (double time : timeSpent) {
+			total += (double) time;
 		}
-		
-		/*
-		 * TODO: need to work out a way to increase the timeSpent for 
-		 * 		each timer
-		 */
-
-		/**
-		 * run
-		 * Start the timer
-		 * 
-		 */
-		public void run() {
-			this.thread.start();
-		}
-		
-		
-		/**
-		 * killThread
-		 * End the current thread
-		 * 
-		 * @throws InterruptedException, caught in run()
-		 */
-		public void killThread() {
-			this.thread.interrupt();
-		}
+		return total;
 	}
 }
