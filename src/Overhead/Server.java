@@ -15,7 +15,7 @@ public class Server extends Node {
 	private Terminal terminal;
 	private Connection connectionList;
 	private boolean pinging = false;
-	private String target;
+	private String target  = "Justin Beiber";
 	private AcknowledgeSetup ack;
 	private WorkloadPacket workLoad;
 	private TerminateWork terminate;

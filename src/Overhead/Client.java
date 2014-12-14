@@ -24,6 +24,7 @@ public class Client extends Node {
 	private PingResponse ping;
 	private ProcessData leDataProcessor;
 	private String target;
+	private int capacity = 50;
 
 	/**
 	 * Constructor Attempts to create socket at given port and create an
@@ -74,12 +75,11 @@ public class Client extends Node {
 		setupRequest = new SetupPacket(this);
 		setupRequest.sendRequest();
 		this.wait();
-		int capacity = 100;
-		while (!targetFound) {
-			workRequest = new WorkRequest(capacity, this);
-			workRequest.sendRequest();
-			this.wait();
-		}
+//		while (!targetFound) {
+//			workRequest = new WorkRequest(capacity, this);
+//			workRequest.sendRequest();
+//			this.wait();
+//		}
 	}
 
 	/**

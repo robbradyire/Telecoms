@@ -51,6 +51,12 @@ public abstract class PacketContent {
 				case PING_RESPONSE:
 					content = new PingResponse(oin);
 					break;
+				case WORK_REQUEST:
+					content = new WorkRequest(oin);
+					break;
+				case WORKLOAD_PACKET:
+					content = new WorkloadPacket(oin);
+					break;
 				case TASK_COMPLETE:
 					content = new SucessPacket(oin);
 					break;
