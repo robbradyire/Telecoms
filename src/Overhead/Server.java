@@ -1,14 +1,15 @@
 package Overhead;
 
-import Packets.*;
-
-import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketAddress;
-import java.net.SocketException;
 
 import tcdIO.Terminal;
+import Packets.AcknowledgeSetup;
+import Packets.GenericActionPacket;
+import Packets.PacketContent;
+import Packets.WorkRequest;
+import Packets.WorkloadPacket;
 
 public class Server extends Node {
 	public static final int DEFAULT_PORT = 50001;
@@ -17,7 +18,7 @@ public class Server extends Node {
 	private boolean pinging = false;
 	private AcknowledgeSetup ack;
 	private WorkloadPacket workLoad;
-	private TerminateWork terminate;
+	private GenericActionPacket terminationPacket;
 	private DataAllocator dataAllocator;
 
 	private String target = "Justin Beiber";
@@ -68,8 +69,9 @@ public class Server extends Node {
 			case PacketContent.TASK_COMPLETE:
 				for (SocketAddress workerAddress : connectionList
 						.listConnections().keySet()) {
-					terminate = new TerminateWork(this, workerAddress);
-					terminate.send();
+					terminationPacket = new GenericActionPacket(workerAddress,
+							this, PacketContent.END_ALL_WORK);
+					terminationPacket.send();
 				}
 				this.notify();
 				break;

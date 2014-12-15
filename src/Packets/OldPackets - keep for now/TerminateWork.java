@@ -102,4 +102,16 @@ public class TerminateWork extends PacketContent {
 		return "TerminateWork sent from " + server.DEFAULT_PORT + " to "
 				+ getDestAddress();
 	}
+
+	@Override
+	protected void confirmSent() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected boolean hasBeenSent() {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }

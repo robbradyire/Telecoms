@@ -46,10 +46,10 @@ public abstract class PacketContent {
 					content = new AcknowledgeSetup(oin);
 					break;
 				case PING_REQUEST:
-					content = new PingRequest(oin);
+					content = new GenericActionPacket(oin, PING_REQUEST);
 					break;
 				case PING_RESPONSE:
-					content = new PingResponse(oin);
+					content = new GenericActionPacket(oin, PING_RESPONSE);
 					break;
 				case WORK_REQUEST:
 					content = new WorkRequest(oin);
@@ -61,7 +61,7 @@ public abstract class PacketContent {
 					content = new SucessPacket(oin);
 					break;
 				case END_ALL_WORK:
-					content = new TerminateWork(oin);
+					content = new GenericActionPacket(oin, END_ALL_WORK);
 					break;
 			}
 			oin.close();
@@ -81,6 +81,12 @@ public abstract class PacketContent {
 	 *        Stream to write the content for the packet to.
 	 */
 	protected abstract void toObjectOutputStream(ObjectOutputStream out);
+
+	protected abstract void send();
+
+	protected abstract void confirmSent();
+
+	protected abstract boolean hasBeenSent();
 
 	/**
 	 * Returns the content of the object as DatagramPacket.

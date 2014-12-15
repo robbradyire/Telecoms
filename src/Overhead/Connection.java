@@ -5,12 +5,13 @@ import java.net.SocketAddress;
 import java.net.SocketException;
 import java.util.concurrent.ConcurrentHashMap;
 
-import Packets.PingRequest;
+import Packets.GenericActionPacket;
+import Packets.PacketContent;
 
 /**
  * TODO
  * 
- * @author Tomas Barry and Robert Brady
+ * @author Tomas Barry & Robert Brady
  * 
  */
 public class Connection {
@@ -58,9 +59,10 @@ public class Connection {
 	 * 
 	 */
 	public void ping() {
-		PingRequest ping;
+		GenericActionPacket ping;
 		for (SocketAddress worker : connections.keySet()) {
-			ping = new PingRequest(worker, server);
+			ping = new GenericActionPacket(worker, server,
+					PacketContent.PING_REQUEST);
 			ping.send();
 			connections.put(worker, connections.get(worker) + 1);
 			if (connections.get(worker) > thresholdPing) {

@@ -152,4 +152,10 @@ public class SucessPacket extends PacketContent {
 			this.thread.interrupt();
 		}
 	}
+
+	@Override
+	protected void confirmSent() {
+		// TODO Auto-generated method stub
+		
+	}
 }

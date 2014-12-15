@@ -3,9 +3,11 @@ package Overhead;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.net.SocketException;
 
 import tcdIO.Terminal;
+import Packets.GenericActionPacket;
 import Packets.PacketContent;
 import Packets.PingResponse;
 import Packets.SetupPacket;
@@ -25,7 +27,7 @@ public class Client extends Node {
 	private SetupPacket setupRequest;
 	private SucessPacket sucessPacket;
 	private WorkRequest workRequest;
-	private PingResponse ping;
+	private GenericActionPacket ping;
 	private ProcessData leDataProcessor;
 	private int statsNoOfNames;
 	private int statsNoOfWorkloads;
@@ -57,32 +59,33 @@ public class Client extends Node {
 		PacketContent content = PacketContent.fromDatagramPacket(packet);
 		int type = content.getType();
 		switch (type) {
-		case PacketContent.SETUP_ACK:
-			setupRequest.confirmRequest();
-			this.notify();
-			break;
-		case PacketContent.PING_REQUEST:
-			terminal.println("Sending ping response");
-			ping = new PingResponse(this);
-			ping.send();
-			break;
-		case PacketContent.WORKLOAD_PACKET:
-			this.statsNoOfWorkloads++;
-			leDataProcessor = new ProcessData(
-					((WorkloadPacket) content).getData(), target);
-			leDataProcessor.processTheData(this);
-			statsNoOfNames += leDataProcessor.getData().length;
-			leDataProcessor.processTheData(this);
-			this.notify();
-			break;
-		case PacketContent.END_ALL_WORK:
-			terminal.println("Work Completed. \n Your computer's statistics:");
-			terminal.println("Total number of names processed: "
-					+ statsNoOfNames);
-			terminal.println("Total number of workload items given: "
-					+ statsNoOfWorkloads);
-			targetFound = true;
-			break;
+			case PacketContent.SETUP_ACK:
+				setupRequest.confirmRequest();
+				this.notify();
+				break;
+			case PacketContent.PING_REQUEST:
+				terminal.println("Sending ping response");
+				ping = new GenericActionPacket(getDestAddress(), this,
+						PacketContent.PING_RESPONSE);
+				ping.send();
+				break;
+			case PacketContent.WORKLOAD_PACKET:
+				this.statsNoOfWorkloads++;
+				leDataProcessor = new ProcessData(
+						((WorkloadPacket) content).getData(), target);
+				leDataProcessor.processTheData(this);
+				statsNoOfNames += leDataProcessor.getData().length;
+				leDataProcessor.processTheData(this);
+				this.notify();
+				break;
+			case PacketContent.END_ALL_WORK:
+				terminal.println("Work Completed. \n Your computer's statistics:");
+				terminal.println("Total number of names processed: "
+						+ statsNoOfNames);
+				terminal.println("Total number of workload items given: "
+						+ statsNoOfWorkloads);
+				targetFound = true;
+				break;
 		}
 	}
 
@@ -93,6 +96,13 @@ public class Client extends Node {
 		setupRequest = new SetupPacket(this);
 		setupRequest.sendRequest();
 		this.wait();
+	}
+
+	/**
+	 * TODO
+	 */
+	public SocketAddress getDestAddress() {
+		return dstAddress;
 	}
 
 	/**

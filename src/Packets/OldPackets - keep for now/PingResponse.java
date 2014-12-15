@@ -87,4 +87,16 @@ public class PingResponse extends PacketContent {
 				+ worker.dstAddress;
 	}
 
+	@Override
+	protected void confirmSent() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected boolean hasBeenSent() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 }

@@ -153,4 +153,16 @@ public class SetupPacket extends PacketContent {
 			this.thread.interrupt();
 		}
 	}
+
+	@Override
+	protected void send() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void confirmSent() {
+		// TODO Auto-generated method stub
+		
+	}
 }

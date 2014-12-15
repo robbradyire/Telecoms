@@ -120,4 +120,22 @@ public class WorkloadPacket extends PacketContent {
 	public String toString() {
 		return new String(data);
 	}
+
+	@Override
+	protected void send() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void confirmSent() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected boolean hasBeenSent() {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }

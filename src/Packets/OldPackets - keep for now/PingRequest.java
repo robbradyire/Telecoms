@@ -124,4 +124,10 @@ public class PingRequest extends PacketContent {
 		return "Ping to " + getDestAddress().toString()
 				+ (hasBeenSent() == true ? "has " : "has not ") + "been sent.";
 	}
+
+	@Override
+	protected void confirmSent() {
+		// TODO Auto-generated method stub
+		
+	}
 }

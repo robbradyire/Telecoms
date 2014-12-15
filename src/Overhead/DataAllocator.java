@@ -33,7 +33,7 @@ public class DataAllocator {
 		returnedStringQueue = new LinkedList<String>();
 
 		currentPointer = 0;
-		String textFile = "\\namesShort.txt";
+		String textFile = "namesShort.txt";
 		List<String> itemsName = new ArrayList<String>();
 
 		// Converting the text file into the string array fileString.
