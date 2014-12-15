@@ -33,7 +33,7 @@ public class WorkRequest extends PacketContent {
 	 * @param client: reference to the worker who is sending the packet
 	 */
 	public WorkRequest(int capacity, Client client) {
-		this.type = WORK_REQUEST;
+		this.type = WORKLOAD_REQUEST;
 		this.capacity = capacity;
 		this.hasBeenSent = false;
 		this.worker = client;
@@ -46,7 +46,7 @@ public class WorkRequest extends PacketContent {
 	 */
 	protected WorkRequest(ObjectInputStream oin) {
 		try {
-			this.type = WORK_REQUEST;
+			this.type = WORKLOAD_REQUEST;
 			this.capacity = oin.readInt();
 		}
 		catch (IOException e) {

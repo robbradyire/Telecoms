@@ -10,14 +10,14 @@ import java.net.DatagramPacket;
  * The class is the basis for packet contents of various types.
  */
 public abstract class PacketContent {
-	public static final int SETUP_REQUEST = 0;
-	public static final int SETUP_ACK = 1;
-	public static final int PING_REQUEST = 2;
-	public static final int PING_RESPONSE = 3;
-	public static final int WORK_REQUEST = 4;
+	public static final int ADD_WORKER_REQUEST = 0;
+	public static final int WORKER_ADDED_ACK = 1;
+	public static final int PING_WORKER = 2;
+	public static final int RESPONSE_PING = 3;
+	public static final int WORKLOAD_REQUEST = 4;
 	public static final int WORKLOAD_PACKET = 5;
 	public static final int TASK_COMPLETE = 6;
-	public static final int END_ALL_WORK = 7;
+	public static final int TERMINATE_WORK = 7;
 	protected int type = 0;
 	protected boolean acknowledged = false;
 
@@ -39,19 +39,19 @@ public abstract class PacketContent {
 			oin = new ObjectInputStream(bin);
 			type = oin.readInt(); // read type from beginning of packet
 			switch (type) { // depending on type create content object
-				case SETUP_REQUEST:
-					content = new GenericTimedActionPacket(oin, SETUP_REQUEST);
+				case ADD_WORKER_REQUEST:
+					content = new GenericTimedActionPacket(oin, ADD_WORKER_REQUEST);
 					break;
-				case SETUP_ACK:
+				case WORKER_ADDED_ACK:
 					content = new AcknowledgeSetup(oin);
 					break;
-				case PING_REQUEST:
-					content = new GenericActionPacket(oin, PING_REQUEST);
+				case PING_WORKER:
+					content = new GenericActionPacket(oin, PING_WORKER);
 					break;
-				case PING_RESPONSE:
-					content = new GenericActionPacket(oin, PING_RESPONSE);
+				case RESPONSE_PING:
+					content = new GenericActionPacket(oin, RESPONSE_PING);
 					break;
-				case WORK_REQUEST:
+				case WORKLOAD_REQUEST:
 					content = new WorkRequest(oin);
 					break;
 				case WORKLOAD_PACKET:
@@ -60,8 +60,8 @@ public abstract class PacketContent {
 				case TASK_COMPLETE:
 					content = new GenericTimedActionPacket(oin, TASK_COMPLETE);
 					break;
-				case END_ALL_WORK:
-					content = new GenericActionPacket(oin, END_ALL_WORK);
+				case TERMINATE_WORK:
+					content = new GenericActionPacket(oin, TERMINATE_WORK);
 					break;
 			}
 			oin.close();

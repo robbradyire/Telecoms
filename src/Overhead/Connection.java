@@ -1,17 +1,21 @@
 package Overhead;
 
-import java.io.IOException;
 import java.net.SocketAddress;
-import java.net.SocketException;
 import java.util.concurrent.ConcurrentHashMap;
 
 import Packets.GenericActionPacket;
 import Packets.PacketContent;
 
 /**
- * TODO
- * 
  * @author Tomas Barry & Robert Brady
+ * 
+ *         Connection
+ * 
+ *         Used by the Server to manage it's connections to Worker Nodes. These
+ *         Nodes are kept track of using a ConcurrentHashMap to enable
+ *         concurrent modification of the Map the Keys of the Map are the unique
+ *         SocketAddresses and the Values of the Map are the counts for the
+ *         number of times that Worker has been pinged without response.
  * 
  */
 public class Connection {
@@ -19,8 +23,10 @@ public class Connection {
 	private ConcurrentHashMap<SocketAddress, Integer> connections;
 	private int thresholdPing;
 
+	// Constructor
+	// ---------------------------------------------------------------------
 	/**
-	 * Constructor
+	 * Connection onstructor
 	 */
 	public Connection(Server controller) {
 		this.server = controller;
@@ -28,22 +34,23 @@ public class Connection {
 		this.thresholdPing = 5;
 	}
 
+	// Methods
+	// ---------------------------------------------------------------------
 	/**
 	 * addConnection
-	 * add a Client socket address to the list
+	 * add a Worker to the Map and initialize its ping count to 0
 	 * 
-	 * @param clientSocket: SocketAddress of the Client
+	 * @param clientSocket: SocketAddress of the Worker
 	 */
 	public void addConnection(SocketAddress clientSocket) {
-		// key is the SocketAddress, value is the pingCount, starts at 0
 		connections.put(clientSocket, 0);
 	}
 
 	/**
 	 * numberOfConnections
-	 * gives the number of Client connections to the Server
+	 * gives the number of Workers connected to the Server
 	 * 
-	 * @return connections.size(): the size of the list
+	 * @return the number of Workers connected to the Server
 	 */
 	public int numberOfConnections() {
 		return connections.size();
@@ -51,55 +58,80 @@ public class Connection {
 
 	/**
 	 * ping
-	 * send a ping to all Clients in the lint
-	 * 
-	 * @throws IOException
-	 * @throws SocketException
-	 * @throws InterruptedException
-	 * 
+	 * send a ping to all Workers currently connected to the Server
 	 */
 	public void ping() {
 		GenericActionPacket ping;
 		for (SocketAddress worker : connections.keySet()) {
 			ping = new GenericActionPacket(worker, server,
-					PacketContent.PING_REQUEST);
+					PacketContent.PING_WORKER);
 			ping.send();
-			connections.put(worker, connections.get(worker) + 1);
+			connections.put(worker, connections.get(worker) + 1); // update the ping count
 			if (connections.get(worker) > thresholdPing) {
 				connections.remove(worker);
-				System.out.println("Removing " + worker.toString());
+				System.out.println("Removing " + worker.toString()); // TODO remove before final version
 			}
 		}
 	}
 
 	/**
 	 * confirmPing
-	 * confirm the receipt of a PingResponse
+	 * confirm the receipt of a the Ping from the Worker
 	 * 
-	 * 
+	 * @param worker: the address of the worker that sent a ping response
 	 */
 	public void confirmPing(SocketAddress worker) {
 		connections.put(worker, 0);
 	}
 
 	/**
-	 * 
+	 * terminateWorkers
+	 * send out a GenericActionPacket to all Workers in the Map indicating that
+	 * they can all stop working as the task has been complete or abandoned
 	 */
-	public ConcurrentHashMap<SocketAddress, Integer> listConnections() {
-		return connections;
+	public void terminateWorkers() {
+		for (SocketAddress worker : connections.keySet()) {
+			terminateWorker(worker);
+		}
 	}
 
 	/**
-	 * toString
-	 * a String representation of the list of connections
+	 * terminateWorker
+	 * send out a GenericActionPacket to a Workers in the Map indicating that it
+	 * can stop working as the task has been complete or abandoned
 	 * 
-	 * @param s.toString(): a line separated list of connections
+	 * @param worker: address of the worker to send the Packet to
+	 */
+	public void terminateWorker(SocketAddress worker) {
+		GenericActionPacket terminate;
+		terminate = new GenericActionPacket(worker, server,
+				PacketContent.TERMINATE_WORK);
+		terminate.send();
+	}
+
+	/**
+	 * getConnections
+	 * returns a ConcurrentHashMap object containing the connections
+	 * 
+	 * @return connections: the connections
+	 */
+	public ConcurrentHashMap<SocketAddress, Integer> getConnections() {
+		return connections;
+	}
+
+	// toString
+	// ----------------------------------------------------------------
+	/**
+	 * toString
+	 * returns a String representation of the list of connections
+	 * 
+	 * @return a line separated list of connections
 	 */
 	public String toString() {
-		StringBuilder s = new StringBuilder();
+		StringBuilder list = new StringBuilder();
 		for (SocketAddress socket : connections.keySet()) {
-			s.append(socket.toString() + "\n");
+			list.append(socket.toString() + "\n");
 		}
-		return s.toString();
+		return list.toString().trim(); // remove newline char from the end
 	}
 }

@@ -2,26 +2,23 @@ package Overhead;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.SocketAddress;
 
 import tcdIO.Terminal;
 import Packets.AcknowledgeSetup;
-import Packets.GenericActionPacket;
 import Packets.PacketContent;
 import Packets.WorkRequest;
 import Packets.WorkloadPacket;
 
 public class Server extends Node {
 	public static final int DEFAULT_PORT = 50001;
-	private Terminal terminal;
 	private Connection connectionList;
 	private boolean pinging = false;
-	private AcknowledgeSetup ack;
-	private WorkloadPacket workLoad;
-	private GenericActionPacket terminationPacket;
+	private WorkloadPacket workload;
 	private DataAllocator dataAllocator;
 
+	private boolean taskComplete = false;
 	private String target = "Justin Beiber";
+	private Terminal terminal;
 
 	/*
 	 * constructor gives server a terminal and a socket starting its thread
@@ -45,41 +42,39 @@ public class Server extends Node {
 	 *        : the packet received
 	 */
 	public synchronized void onReceipt(DatagramPacket packet) {
-		PacketContent content = PacketContent.fromDatagramPacket(packet);
-		int type = content.getType();
-		switch (type) {
-			case PacketContent.SETUP_REQUEST:
-				connectionList.addConnection(packet.getSocketAddress());
-				ack = new AcknowledgeSetup(this, packet.getSocketAddress(),
-						target);
-				ack.send();
-				break;
-			case PacketContent.WORK_REQUEST:
-				WorkRequest work = (WorkRequest) content;
-				int dataSize = work.getCapacity();
-				byte[] data = dataAllocator.getBytes(dataSize);
-				workLoad = new WorkloadPacket(data, packet.getSocketAddress(),
-						this);
-				break;
-			case PacketContent.PING_RESPONSE:
-				connectionList.confirmPing(packet.getSocketAddress());
-				System.out.println("confirming ping from "
-						+ packet.getSocketAddress());
-				break;
-			case PacketContent.TASK_COMPLETE:
-				for (SocketAddress workerAddress : connectionList
-						.listConnections().keySet()) {
-					terminationPacket = new GenericActionPacket(workerAddress,
-							this, PacketContent.END_ALL_WORK);
-					terminationPacket.send();
-				}
-				this.notify();
-				break;
-			default:
-				break;
+		if (!taskComplete) {
+			PacketContent content = PacketContent.fromDatagramPacket(packet);
+			int type = content.getType();
+			switch (type) {
+				case PacketContent.ADD_WORKER_REQUEST:
+					connectionList.addConnection(packet.getSocketAddress());
+					AcknowledgeSetup ack = new AcknowledgeSetup(this,
+							packet.getSocketAddress(), target);
+					ack.send();
+					break;
+				case PacketContent.WORKLOAD_REQUEST:
+					WorkRequest work = (WorkRequest) content;
+					int dataSize = work.getCapacity();
+					byte[] data = dataAllocator.getBytes(dataSize);
+					workload = new WorkloadPacket(data,
+							packet.getSocketAddress(), this);
+					workload.send();
+					break;
+				case PacketContent.RESPONSE_PING:
+					connectionList.confirmPing(packet.getSocketAddress());
+					System.out.println("confirming ping from "
+							+ packet.getSocketAddress());
+					break;
+				case PacketContent.TASK_COMPLETE:
+					connectionList.terminateWorkers();
+					taskComplete = true;
+					this.notify();
+					break;
+			}
 		}
-		terminal.println(connectionList.toString() + "all de workers");
-		terminal.println("$w3g = " + connectionList.numberOfConnections());
+		else {
+			connectionList.terminateWorker(packet.getSocketAddress());
+		}
 	}
 
 	/**
@@ -94,6 +89,8 @@ public class Server extends Node {
 		while (!pinging) {
 			this.wait(2000);
 			connectionList.ping();
+			terminal.println(connectionList.toString() + "all de workers");
+			terminal.println("$w3g = " + connectionList.numberOfConnections());
 		}
 		System.out.println("Shouldn't get here");
 	}

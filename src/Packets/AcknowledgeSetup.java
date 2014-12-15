@@ -37,7 +37,7 @@ public class AcknowledgeSetup extends PacketContent {
 	 */
 	public AcknowledgeSetup(Server controller, SocketAddress dstAddress,
 			String taget) {
-		this.type = SETUP_ACK;
+		this.type = WORKER_ADDED_ACK;
 		this.server = controller;
 		this.workerAddress = dstAddress;
 		this.target = taget;
@@ -50,7 +50,7 @@ public class AcknowledgeSetup extends PacketContent {
 	 */
 	public AcknowledgeSetup(ObjectInputStream oin) {
 		try {
-			type = SETUP_ACK;
+			type = WORKER_ADDED_ACK;
 			target = oin.readUTF();
 		}
 		catch (Exception e) {

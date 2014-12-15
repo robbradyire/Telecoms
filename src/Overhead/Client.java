@@ -57,14 +57,14 @@ public class Client extends Node {
 		PacketContent content = PacketContent.fromDatagramPacket(packet);
 		int type = content.getType();
 		switch (type) {
-			case PacketContent.SETUP_ACK:
+			case PacketContent.WORKER_ADDED_ACK:
 				setupRequest.confirmSent();
 				this.notify();
 				break;
-			case PacketContent.PING_REQUEST:
+			case PacketContent.PING_WORKER:
 				terminal.println("Sending ping response");
 				actionPacket = new GenericActionPacket(getDestAddress(), this,
-						PacketContent.PING_RESPONSE);
+						PacketContent.RESPONSE_PING);
 				actionPacket.send();
 				break;
 			case PacketContent.WORKLOAD_PACKET:
@@ -76,7 +76,7 @@ public class Client extends Node {
 				leDataProcessor.processTheData(this);
 				this.notify();
 				break;
-			case PacketContent.END_ALL_WORK:
+			case PacketContent.TERMINATE_WORK:
 				terminal.println("Work Completed. \n Your computer's statistics:");
 				terminal.println("Total number of names processed: "
 						+ statsNoOfNames);
@@ -92,7 +92,7 @@ public class Client extends Node {
 	 */
 	public synchronized void start() throws Exception {
 		setupRequest = new GenericTimedActionPacket(getDestAddress(), this,
-				PacketContent.SETUP_REQUEST);
+				PacketContent.ADD_WORKER_REQUEST);
 		setupRequest.send();
 		this.wait();
 	}
