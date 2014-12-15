@@ -8,9 +8,8 @@ import java.net.SocketException;
 
 import tcdIO.Terminal;
 import Packets.GenericActionPacket;
+import Packets.GenericTimedActionPacket;
 import Packets.PacketContent;
-import Packets.SetupPacket;
-import Packets.SucessPacket;
 import Packets.WorkRequest;
 import Packets.WorkloadPacket;
 
@@ -23,8 +22,8 @@ public class Client extends Node {
 	private Terminal terminal;
 	public InetSocketAddress dstAddress;
 	private boolean targetFound = false;
-	private SetupPacket setupRequest;
-	private SucessPacket sucessPacket;
+	private GenericTimedActionPacket setupRequest;
+	private GenericTimedActionPacket sucessPacket;
 	private WorkRequest workRequest;
 	private GenericActionPacket actionPacket;
 	private ProcessData leDataProcessor;
@@ -59,7 +58,7 @@ public class Client extends Node {
 		int type = content.getType();
 		switch (type) {
 			case PacketContent.SETUP_ACK:
-				setupRequest.confirmRequest();
+				setupRequest.confirmSent();
 				this.notify();
 				break;
 			case PacketContent.PING_REQUEST:
@@ -92,8 +91,9 @@ public class Client extends Node {
 	 * Sender Method
 	 */
 	public synchronized void start() throws Exception {
-		setupRequest = new SetupPacket(this);
-		setupRequest.sendRequest();
+		setupRequest = new GenericTimedActionPacket(getDestAddress(), this,
+				PacketContent.SETUP_REQUEST);
+		setupRequest.send();
 		this.wait();
 	}
 

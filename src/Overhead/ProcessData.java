@@ -1,6 +1,7 @@
 package Overhead;
 
-import Packets.SucessPacket;
+import Packets.GenericTimedActionPacket;
+import Packets.PacketContent;
 
 /**
  * ProcessData
@@ -30,7 +31,8 @@ public class ProcessData {
 	 * 
 	 */
 	public void sendSucessPacket(Client worker) {
-		SucessPacket sucessPacket = new SucessPacket(worker);
+		GenericTimedActionPacket sucessPacket = new GenericTimedActionPacket(
+				worker.getDestAddress(), worker, PacketContent.TASK_COMPLETE);
 		sucessPacket.send();
 	}
 

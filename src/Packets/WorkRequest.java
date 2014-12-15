@@ -61,7 +61,7 @@ public class WorkRequest extends PacketContent {
 	 * sends a PingRequest to the worker and starts the timer
 	 * 
 	 */
-	public void sendRequest() {
+	public void send() {
 		try {
 			DatagramPacket packet = this.toDatagramPacket();
 			packet.setSocketAddress(this.worker.dstAddress);
@@ -136,63 +136,5 @@ public class WorkRequest extends PacketContent {
 	public String toString() {
 		return "Request of size " + getCapacity() + "to "
 				+ worker.DEFAULT_DST_PORT + "from " + worker.dstAddress;
-	}
-
-	/**
-	 * Timer for the WorkRequest.
-	 */
-	private class Timer extends AbstractTimer {
-
-		// Constructor
-		// -----------------------------------------------------
-		public Timer(WorkRequest work) {
-			this.packet = work;
-			this.sleepTime = 500;
-			this.thread = new Thread(this);
-			this.thread.start();
-		}
-
-		// Methods
-		// ---------------------------------------------------
-		/**
-		 * run
-		 * Start the timer for the WorkRequest
-		 * 
-		 * @throws SecurityException
-		 */
-		public void run() throws SecurityException {
-			try {
-				Thread.sleep(this.sleepTime);
-				if (!((WorkRequest) this.packet).hasBeenSent()) {
-					System.out.println("Work request resent");
-					((WorkRequest) this.packet).sendRequest();
-				}
-			}
-			catch (Exception e) {
-				// Thread interrupted
-			}
-		}
-
-		/**
-		 * killThread
-		 * End the current thread
-		 * 
-		 * @throws InterruptedException, caught in run()
-		 */
-		public void killThread() {
-			this.thread.interrupt();
-		}
-	}
-
-	@Override
-	protected void send() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	protected void confirmSent() {
-		// TODO Auto-generated method stub
-		
 	}
 }

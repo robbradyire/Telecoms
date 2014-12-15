@@ -18,7 +18,7 @@ import Overhead.Client;
  */
 public class SetupPacket extends PacketContent {
 	private boolean hasBeenSent;
-	private Timer timer;
+	private AbstractTimer timer;
 	private Client worker;
 
 	// Constructors
@@ -50,12 +50,12 @@ public class SetupPacket extends PacketContent {
 	 * sends a request to set up a connection to the Server and start the Timer
 	 * 
 	 */
-	public void sendRequest() {
+	public void send() {
 		try {
 			DatagramPacket packet = this.toDatagramPacket();
 			packet.setSocketAddress(this.worker.dstAddress);
 			this.worker.socket.send(packet);
-			this.timer = new Timer(this);
+			this.timer = new AbstractTimer(this);
 		}
 		catch (SocketException e) {
 			// no action
@@ -113,52 +113,47 @@ public class SetupPacket extends PacketContent {
 				+ (hasBeenSent() ? " been" : " not been") + " acknowledged";
 	}
 
-	/**
-	 * Timer
-	 */
-	private class Timer extends AbstractTimer {
-		public Timer(SetupPacket work) {
-			this.packet = work;
-			this.sleepTime = 1000;
-			this.thread = new Thread(this);
-			this.thread.start();
-		}
+//	/**
+//	 * Timer
+//	 */
+//	private class Timer extends AbstractTimer {
+//		public Timer(SetupPacket work) {
+//			this.packet = work;
+//			this.sleepTime = 1000;
+//			this.thread = new Thread(this);
+//			this.thread.start();
+//		}
+//
+//		/**
+//		 * run
+//		 * Start the timer
+//		 * 
+//		 * @throws SecurityException
+//		 */
+//		public void run() throws SecurityException {
+//			try {
+//				Thread.sleep(this.sleepTime);
+//				if (!((SetupPacket) this.packet).hasBeenSent()) {
+//					System.out.println("Setup request resent");
+//					((SetupPacket) this.packet).sendRequest();
+//				}
+//			}
+//			catch (Exception e) {
+//				// Thread interrupted
+//			}
+//		}
+//
+//		/**
+//		 * killThread
+//		 * End the current thread
+//		 * 
+//		 * @throws InterruptedException, caught in run()
+//		 */
+//		public void killThread() {
+//			this.thread.interrupt();
+//		}
+//	}
 
-		/**
-		 * run
-		 * Start the timer
-		 * 
-		 * @throws SecurityException
-		 */
-		public void run() throws SecurityException {
-			try {
-				Thread.sleep(this.sleepTime);
-				if (!((SetupPacket) this.packet).hasBeenSent()) {
-					System.out.println("Setup request resent");
-					((SetupPacket) this.packet).sendRequest();
-				}
-			}
-			catch (Exception e) {
-				// Thread interrupted
-			}
-		}
-
-		/**
-		 * killThread
-		 * End the current thread
-		 * 
-		 * @throws InterruptedException, caught in run()
-		 */
-		public void killThread() {
-			this.thread.interrupt();
-		}
-	}
-
-	@Override
-	protected void send() {
-		// TODO Auto-generated method stub
-		
-	}
 
 	@Override
 	protected void confirmSent() {

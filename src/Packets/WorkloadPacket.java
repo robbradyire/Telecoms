@@ -60,7 +60,7 @@ public class WorkloadPacket extends PacketContent {
 	 * sends a WorkloadPacket to the worker
 	 * 
 	 */
-	public void sendWorkload() {
+	public void send() {
 		try {
 			DatagramPacket packet = this.toDatagramPacket();
 			packet.setSocketAddress(this.getDestAddress());
@@ -121,17 +121,6 @@ public class WorkloadPacket extends PacketContent {
 		return new String(data);
 	}
 
-	@Override
-	protected void send() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	protected void confirmSent() {
-		// TODO Auto-generated method stub
-		
-	}
 
 	@Override
 	protected boolean hasBeenSent() {

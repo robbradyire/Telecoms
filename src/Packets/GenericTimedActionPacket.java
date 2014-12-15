@@ -11,39 +11,41 @@ import Overhead.Node;
 /**
  * @author Tomas Barry
  * 
- *         GenericActionPacket
+ *         GenericTimedActionPacket
  * 
  *         A packet that sends info either from one Node to another Node. The
  *         packet indicates that some action must be taken by the receiver. It
- *         does not require a Timer to operate.
+ *         does make use of a Timer to operate.
  * 
  */
-public class GenericActionPacket extends PacketContent {
+public class GenericTimedActionPacket extends PacketContent {
 	private Node sender;
 	private SocketAddress destAddress;
+	private Timer timer;
 
 	// Constructors
 	// -------------------------------------------------------------------
 
 	/**
-	 * GenericActionPacket constructor
+	 * GenericTimedActionPacket constructor
 	 * 
 	 * @param receiver: destination address of the packet
 	 * @param sender: reference to the sender Node to allow internal sending
 	 * @param type: the type of the packet
 	 */
-	public GenericActionPacket(SocketAddress receiver, Node sender, int type) {
+	public GenericTimedActionPacket(SocketAddress receiver, Node sender,
+			int type) {
 		this.type = type;
 		this.destAddress = receiver;
 		this.sender = sender;
 	}
 
 	/**
-	 * GenericActionPacket constructor
+	 * GenericTimedActionPacket constructor
 	 * 
 	 * @param oin: ObjectInputStream that contains data about the packet
 	 */
-	public GenericActionPacket(ObjectInputStream oin, int type) {
+	public GenericTimedActionPacket(ObjectInputStream oin, int type) {
 		this.type = type;
 	}
 
@@ -59,6 +61,7 @@ public class GenericActionPacket extends PacketContent {
 			DatagramPacket packet = this.toDatagramPacket();
 			packet.setSocketAddress(this.getDestAddress());
 			this.sender.socket.send(packet);
+			this.timer = new Timer(this);
 		}
 		catch (IOException e) {
 			// no action
@@ -80,8 +83,9 @@ public class GenericActionPacket extends PacketContent {
 	 * Called by the sending Node. Indicates that the Packet has successfully
 	 * been sent. This is determined by the sending Node
 	 */
-	protected void confirmSent() {
+	public void confirmSent() {
 		this.acknowledged = true;
+		this.timer.killThread();
 	}
 
 	// Getters

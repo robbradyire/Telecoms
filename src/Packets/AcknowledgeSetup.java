@@ -128,12 +128,6 @@ public class AcknowledgeSetup extends PacketContent {
 	}
 
 	@Override
-	protected void confirmSent() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
 	protected boolean hasBeenSent() {
 		// TODO Auto-generated method stub
 		return false;

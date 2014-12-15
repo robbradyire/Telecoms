@@ -1,6 +1,5 @@
 package Packets;
 
-import Overhead.*;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
@@ -41,7 +40,7 @@ public abstract class PacketContent {
 			type = oin.readInt(); // read type from beginning of packet
 			switch (type) { // depending on type create content object
 				case SETUP_REQUEST:
-					content = new SetupPacket(oin);
+					content = new GenericTimedActionPacket(oin, SETUP_REQUEST);
 					break;
 				case SETUP_ACK:
 					content = new AcknowledgeSetup(oin);
@@ -59,7 +58,7 @@ public abstract class PacketContent {
 					content = new WorkloadPacket(oin);
 					break;
 				case TASK_COMPLETE:
-					content = new SucessPacket(oin);
+					content = new GenericTimedActionPacket(oin, TASK_COMPLETE);
 					break;
 				case END_ALL_WORK:
 					content = new GenericActionPacket(oin, END_ALL_WORK);
@@ -74,49 +73,6 @@ public abstract class PacketContent {
 		}
 		return content;
 	}
-
-	/**
-	 * Returns the type of the packet.
-	 * 
-	 * @return Returns the type of the packet.
-	 */
-	public int getType() {
-		return this.type;
-	}
-
-	/**
-	 * confirmSent
-	 * Called by the sending Node. Indicates that the Packet has successfully
-	 * been sent. This is determined by the sending Node
-	 */
-	protected void confirmSent() {
-		this.acknowledged = true;
-	}
-
-	/**
-	 * hasBeenSent
-	 * returns boolean based on whether the Packet has been sent successfully
-	 * 
-	 * @return true: if Packet responded to
-	 * @return false: if Packet not yet responded to
-	 */
-	protected boolean hasBeenSent() {
-		return acknowledged;
-	}
-
-	/**
-	 * toObjectOutputStream
-	 * This method is used to transform content into an output stream.
-	 * 
-	 * @param out: Stream to write the content for the packet to.
-	 */
-	protected abstract void toObjectOutputStream(ObjectOutputStream out);
-
-	/**
-	 * send
-	 * sends the Packet to a Node
-	 */
-	protected abstract void send();
 
 	/**
 	 * Returns the content of the object as DatagramPacket.
@@ -146,6 +102,49 @@ public abstract class PacketContent {
 		}
 		return packet;
 	}
+
+	/**
+	 * Returns the type of the packet.
+	 * 
+	 * @return Returns the type of the packet.
+	 */
+	public int getType() {
+		return this.type;
+	}
+
+	//	/**
+	//	 * confirmSent
+	//	 * Called by the sending Node. Indicates that the Packet has successfully
+	//	 * been sent. This is determined by the sending Node
+	//	 */
+	//	protected void confirmSent() {
+	//		this.acknowledged = true;
+	//	}
+
+	/**
+	 * hasBeenSent
+	 * returns boolean based on whether the Packet has been sent successfully
+	 * 
+	 * @return true: if Packet responded to
+	 * @return false: if Packet not yet responded to
+	 */
+	protected boolean hasBeenSent() {
+		return this.acknowledged;
+	}
+
+	/**
+	 * toObjectOutputStream
+	 * This method is used to transform content into an output stream.
+	 * 
+	 * @param out: Stream to write the content for the packet to.
+	 */
+	protected abstract void toObjectOutputStream(ObjectOutputStream out);
+
+	/**
+	 * send
+	 * sends the Packet to a Node
+	 */
+	protected abstract void send();
 
 	/**
 	 * Returns the content of the packet as String.

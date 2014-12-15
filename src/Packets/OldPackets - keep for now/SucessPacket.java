@@ -17,7 +17,7 @@ import java.net.SocketException;
  */
 public class SucessPacket extends PacketContent {
 	private boolean hasBeenSent;
-	private Timer timer;
+	private AbstractTimer timer;
 	private Client worker;
 
 	// Constructors
@@ -55,7 +55,7 @@ public class SucessPacket extends PacketContent {
 			DatagramPacket packet = this.toDatagramPacket();
 			packet.setSocketAddress(this.worker.dstAddress);
 			this.worker.socket.send(packet);
-			this.timer = new Timer(this);
+			this.timer = new AbstractTimer(this);
 		}
 		catch (SocketException e) {
 			// no action
@@ -112,46 +112,46 @@ public class SucessPacket extends PacketContent {
 				+ (hasBeenSent() ? " been" : " not been") + " acknowledged";
 	}
 
-	/**
-	 * Timer
-	 */
-	private class Timer extends AbstractTimer {
-		public Timer(SucessPacket work) {
-			this.packet = work;
-			this.sleepTime = 500;
-			this.thread = new Thread(this);
-			this.thread.start();
-		}
-
-		/**
-		 * run
-		 * Start the timer
-		 * 
-		 * @throws SecurityException
-		 */
-		public void run() throws SecurityException {
-			try {
-				Thread.sleep(this.sleepTime);
-				if (!((SucessPacket) this.packet).hasBeenSent()) {
-					System.out.println("SucessPacket resent");
-					((SucessPacket) this.packet).send();
-				}
-			}
-			catch (Exception e) {
-				// Thread interrupted
-			}
-		}
-
-		/**
-		 * killThread
-		 * End the current thread
-		 * 
-		 * @throws InterruptedException, caught in run()
-		 */
-		public void killThread() {
-			this.thread.interrupt();
-		}
-	}
+//	/**
+//	 * Timer
+//	 */
+//	private class Timer extends AbstractTimer {
+//		public Timer(SucessPacket work) {
+//			this.packet = work;
+//			this.sleepTime = 500;
+//			this.thread = new Thread(this);
+//			this.thread.start();
+//		}
+//
+//		/**
+//		 * run
+//		 * Start the timer
+//		 * 
+//		 * @throws SecurityException
+//		 */
+//		public void run() throws SecurityException {
+//			try {
+//				Thread.sleep(this.sleepTime);
+//				if (!((SucessPacket) this.packet).hasBeenSent()) {
+//					System.out.println("SucessPacket resent");
+//					((SucessPacket) this.packet).send();
+//				}
+//			}
+//			catch (Exception e) {
+//				// Thread interrupted
+//			}
+//		}
+//
+//		/**
+//		 * killThread
+//		 * End the current thread
+//		 * 
+//		 * @throws InterruptedException, caught in run()
+//		 */
+//		public void killThread() {
+//			this.thread.interrupt();
+//		}
+//	}
 
 	@Override
 	protected void confirmSent() {
