@@ -21,7 +21,7 @@ import Overhead.Node;
 public class GenericActionPacket extends PacketContent {
 	private Node sender;
 	private SocketAddress destAddress;
-	private boolean acknowledged;
+//	private boolean acknowledged;
 
 	// Constructors
 	// -------------------------------------------------------------------
@@ -37,7 +37,7 @@ public class GenericActionPacket extends PacketContent {
 		this.type = type;
 		this.destAddress = receiver;
 		this.sender = sender;
-		this.acknowledged = false;
+//		this.acknowledged = false;
 	}
 
 	/**
@@ -54,7 +54,7 @@ public class GenericActionPacket extends PacketContent {
 
 	/**
 	 * send
-	 * sends a GenericActionPacket to a Node
+	 * sends the Packet to a Node
 	 */
 	public void send() {
 		try {
@@ -77,14 +77,14 @@ public class GenericActionPacket extends PacketContent {
 		// nothing to write
 	}
 
-	/**
-	 * acknowledged
-	 * Called by the sending Node. Indicates that the GenericActionPacket has
-	 * successfully been sent. This is determined by the sending Node
-	 */
-	public void confirmSent() {
-		acknowledged = true;
-	}
+//	/**
+//	 * confirmSent
+//	 * Called by the sending Node. Indicates that the Packet has successfully
+//	 * been sent. This is determined by the sending Node
+//	 */
+//	public void confirmSent() {
+//		acknowledged = true;
+//	}
 
 	// Getters
 	// -------------------------------------------------------------
@@ -109,16 +109,16 @@ public class GenericActionPacket extends PacketContent {
 		return sender.socket.getLocalSocketAddress();
 	}
 
-	/**
-	 * hasBeenSent
-	 * returns boolean based on whether the Packet has been sent successfully
-	 * 
-	 * @return true: if Packet responded to
-	 * @return false: if Packet not yet responded to
-	 */
-	public boolean hasBeenSent() {
-		return acknowledged;
-	}
+	//	/**
+	//	 * hasBeenSent
+	//	 * returns boolean based on whether the Packet has been sent successfully
+	//	 * 
+	//	 * @return true: if Packet responded to
+	//	 * @return false: if Packet not yet responded to
+	//	 */
+	//	public boolean hasBeenSent() {
+	//		return acknowledged;
+	//	}
 
 	// toString
 	// ------------------------------------------------------------------------

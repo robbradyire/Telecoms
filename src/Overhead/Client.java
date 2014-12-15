@@ -9,7 +9,6 @@ import java.net.SocketException;
 import tcdIO.Terminal;
 import Packets.GenericActionPacket;
 import Packets.PacketContent;
-import Packets.PingResponse;
 import Packets.SetupPacket;
 import Packets.SucessPacket;
 import Packets.WorkRequest;
@@ -27,7 +26,7 @@ public class Client extends Node {
 	private SetupPacket setupRequest;
 	private SucessPacket sucessPacket;
 	private WorkRequest workRequest;
-	private GenericActionPacket ping;
+	private GenericActionPacket actionPacket;
 	private ProcessData leDataProcessor;
 	private int statsNoOfNames;
 	private int statsNoOfWorkloads;
@@ -65,9 +64,9 @@ public class Client extends Node {
 				break;
 			case PacketContent.PING_REQUEST:
 				terminal.println("Sending ping response");
-				ping = new GenericActionPacket(getDestAddress(), this,
+				actionPacket = new GenericActionPacket(getDestAddress(), this,
 						PacketContent.PING_RESPONSE);
-				ping.send();
+				actionPacket.send();
 				break;
 			case PacketContent.WORKLOAD_PACKET:
 				this.statsNoOfWorkloads++;
@@ -99,7 +98,10 @@ public class Client extends Node {
 	}
 
 	/**
-	 * TODO
+	 * getDestAddress
+	 * returns the SocketAddress of the Server
+	 * 
+	 * @return dstAddress: the SocketAddress of the Server
 	 */
 	public SocketAddress getDestAddress() {
 		return dstAddress;

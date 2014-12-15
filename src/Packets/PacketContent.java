@@ -20,6 +20,7 @@ public abstract class PacketContent {
 	public static final int TASK_COMPLETE = 6;
 	public static final int END_ALL_WORK = 7;
 	protected int type = 0;
+	protected boolean acknowledged = false;
 
 	/**
 	 * Constructs an object out of a datagram packet.
@@ -75,18 +76,47 @@ public abstract class PacketContent {
 	}
 
 	/**
+	 * Returns the type of the packet.
+	 * 
+	 * @return Returns the type of the packet.
+	 */
+	public int getType() {
+		return this.type;
+	}
+
+	/**
+	 * confirmSent
+	 * Called by the sending Node. Indicates that the Packet has successfully
+	 * been sent. This is determined by the sending Node
+	 */
+	protected void confirmSent() {
+		this.acknowledged = true;
+	}
+
+	/**
+	 * hasBeenSent
+	 * returns boolean based on whether the Packet has been sent successfully
+	 * 
+	 * @return true: if Packet responded to
+	 * @return false: if Packet not yet responded to
+	 */
+	protected boolean hasBeenSent() {
+		return acknowledged;
+	}
+
+	/**
+	 * toObjectOutputStream
 	 * This method is used to transform content into an output stream.
 	 * 
-	 * @param out
-	 *        Stream to write the content for the packet to.
+	 * @param out: Stream to write the content for the packet to.
 	 */
 	protected abstract void toObjectOutputStream(ObjectOutputStream out);
 
+	/**
+	 * send
+	 * sends the Packet to a Node
+	 */
 	protected abstract void send();
-
-	protected abstract void confirmSent();
-
-	protected abstract boolean hasBeenSent();
 
 	/**
 	 * Returns the content of the object as DatagramPacket.
@@ -123,13 +153,4 @@ public abstract class PacketContent {
 	 * @return Returns the content of the packet as String.
 	 */
 	public abstract String toString();
-
-	/**
-	 * Returns the type of the packet.
-	 * 
-	 * @return Returns the type of the packet.
-	 */
-	public int getType() {
-		return this.type;
-	}
 }
