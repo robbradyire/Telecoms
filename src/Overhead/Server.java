@@ -20,7 +20,7 @@ public class Server extends Node {
 	private TerminateWork terminate;
 	private DataAllocator dataAllocator;
 
-	private String target  = "Justin Beiber";
+	private String target = "Justin Beiber";
 
 	/*
 	 * constructor gives server a terminal and a socket starting its thread
@@ -62,18 +62,22 @@ public class Server extends Node {
 				break;
 			case PacketContent.PING_RESPONSE:
 				connectionList.confirmPing(packet.getSocketAddress());
+				System.out.println("confirming ping from "
+						+ packet.getSocketAddress());
 				break;
 			case PacketContent.TASK_COMPLETE:
 				for (SocketAddress workerAddress : connectionList
-						.listConnections()) {
+						.listConnections().keySet()) {
 					terminate = new TerminateWork(this, workerAddress);
 					terminate.send();
 				}
 				this.notify();
+				break;
 			default:
 				break;
 		}
-		terminal.println(connectionList.toString());
+		terminal.println(connectionList.toString() + "all de workers");
+		terminal.println("$w3g = " + connectionList.numberOfConnections());
 	}
 
 	/**
@@ -89,6 +93,7 @@ public class Server extends Node {
 			this.wait(2000);
 			connectionList.ping();
 		}
+		System.out.println("Shouldn't get here");
 	}
 
 	public static void main(String[] args) {

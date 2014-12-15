@@ -1,13 +1,17 @@
 package Overhead;
 
-import Packets.*;
-import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
 
 import tcdIO.Terminal;
+import Packets.PacketContent;
+import Packets.PingResponse;
+import Packets.SetupPacket;
+import Packets.SucessPacket;
+import Packets.WorkRequest;
+import Packets.WorkloadPacket;
 
 /**
  * Client class An instance accepts user input
@@ -89,11 +93,6 @@ public class Client extends Node {
 		setupRequest = new SetupPacket(this);
 		setupRequest.sendRequest();
 		this.wait();
-		// while (!targetFound) {
-		// workRequest = new WorkRequest(capacity, this);
-		// workRequest.sendRequest();
-		// this.wait();
-		// }
 	}
 
 	/**

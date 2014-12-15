@@ -1,11 +1,11 @@
 package Overhead;
 
-import Packets.*;
-
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.net.SocketException;
-import java.util.LinkedList;
+import java.util.concurrent.ConcurrentHashMap;
+
+import Packets.PingRequest;
 
 /**
  * TODO
@@ -14,18 +14,17 @@ import java.util.LinkedList;
  * 
  */
 public class Connection {
-	private Server controller;
-	private LinkedList<SocketAddress> connections; // list of clients
-	private LinkedList<PingRequest> pingList;
-	private LinkedList<Integer> pingCounts;
+	private Server server;
+	private ConcurrentHashMap<SocketAddress, Integer> connections;
+	private int thresholdPing;
 
 	/**
 	 * Constructor
 	 */
 	public Connection(Server controller) {
-		this.controller = controller;
-		connections = new LinkedList<SocketAddress>();
-		pingCounts = new LinkedList<Integer>();
+		this.server = controller;
+		this.connections = new ConcurrentHashMap<SocketAddress, Integer>();
+		this.thresholdPing = 5;
 	}
 
 	/**
@@ -35,8 +34,8 @@ public class Connection {
 	 * @param clientSocket: SocketAddress of the Client
 	 */
 	public void addConnection(SocketAddress clientSocket) {
-		connections.add(clientSocket);
-		pingCounts.add((Integer) 0);
+		// key is the SocketAddress, value is the pingCount, starts at 0
+		connections.put(clientSocket, 0);
 	}
 
 	/**
@@ -55,37 +54,20 @@ public class Connection {
 	 * 
 	 * @throws IOException
 	 * @throws SocketException
-	 * @throws InterruptedException 
+	 * @throws InterruptedException
 	 * 
 	 */
-	public synchronized void ping() throws SocketException, IOException, InterruptedException {
+	public void ping() {
 		PingRequest ping;
-		pingList = new LinkedList<PingRequest>();
-		// make a copy of the connections to iterate through
-		LinkedList<SocketAddress> connectionsCopy = new LinkedList<SocketAddress>();
-		for (SocketAddress client : connections) {
-			connectionsCopy.add(client);
-		}
-		
-		int i = 0;
-		for (SocketAddress client : connectionsCopy) {
-			if ((int) pingCounts.get(i) < 5) {
-				ping = new PingRequest(client, controller);
-				pingList.add(ping);
-				ping.send();
-				
-				int count = (int) pingCounts.get(i);
-				count += 1;
-				System.out.println("Count: " + count);
-				pingCounts.set(i, (Integer) count);
-				i += 1;
-			} else {
-				System.out.println("Removing connection.");
-				connections.remove(i);
-				pingCounts.remove(i);
+		for (SocketAddress worker : connections.keySet()) {
+			ping = new PingRequest(worker, server);
+			ping.send();
+			connections.put(worker, connections.get(worker) + 1);
+			if (connections.get(worker) > thresholdPing) {
+				connections.remove(worker);
+				System.out.println("Removing " + worker.toString());
 			}
 		}
-		System.out.println("\n");
 	}
 
 	/**
@@ -94,26 +76,14 @@ public class Connection {
 	 * 
 	 * 
 	 */
-	public void confirmPing(SocketAddress client) {
-		int i = 0;
-		try {
-			for (SocketAddress s : connections) {
-				if (s.equals(client)) {
-					pingList.remove(i).confirmPing();
-					pingCounts.set(i, (Integer) 0);
-				}
-				i++;
-			}
-		}
-		catch (IndexOutOfBoundsException e) {
-			// sometimes happens... no need to worry about it
-		}
+	public void confirmPing(SocketAddress worker) {
+		connections.put(worker, 0);
 	}
 
 	/**
 	 * 
 	 */
-	public LinkedList<SocketAddress> listConnections() {
+	public ConcurrentHashMap<SocketAddress, Integer> listConnections() {
 		return connections;
 	}
 
@@ -125,7 +95,7 @@ public class Connection {
 	 */
 	public String toString() {
 		StringBuilder s = new StringBuilder();
-		for (SocketAddress socket : connections) {
+		for (SocketAddress socket : connections.keySet()) {
 			s.append(socket.toString() + "\n");
 		}
 		return s.toString();

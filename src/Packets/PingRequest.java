@@ -19,7 +19,6 @@ import java.net.SocketException;
 public class PingRequest extends PacketContent {
 	private Server server;
 	private SocketAddress workerAddress;
-	private Timer timer;
 	private boolean pinged;
 
 	// Constructors
@@ -60,7 +59,6 @@ public class PingRequest extends PacketContent {
 			DatagramPacket packet = this.toDatagramPacket();
 			packet.setSocketAddress(this.getDestAddress());
 			this.server.socket.send(packet);
-			this.timer = new Timer(this);
 		}
 		catch (SocketException e) {
 			// no action
@@ -87,7 +85,6 @@ public class PingRequest extends PacketContent {
 	 */
 	public void confirmPing() {
 		this.pinged = true;
-		this.timer.killThread();
 	}
 
 	// Getters
@@ -126,47 +123,5 @@ public class PingRequest extends PacketContent {
 	public String toString() {
 		return "Ping to " + getDestAddress().toString()
 				+ (hasBeenSent() == true ? "has " : "has not ") + "been sent.";
-	}
-
-	/**
-	 * Timer
-	 */
-	private class Timer extends AbstractTimer {
-
-		// Constructor
-		// -----------------------------------------------------
-		public Timer(PingRequest ping) {
-			this.packet = ping;
-			this.sleepTime = 1000;
-			this.thread = new Thread(this);
-			this.thread.start();
-		}
-
-		// Methods
-		// ---------------------------------------------------
-		/**
-		 * run
-		 * Start the timer for the ping
-		 * 
-		 * @throws SecurityException
-		 */
-		public void run() throws SecurityException {
-			try {
-				Thread.sleep(this.sleepTime);
-			}
-			catch (Exception e) {
-				// Thread interrupted
-			}
-		}
-
-		/**
-		 * killThread
-		 * End the current thread
-		 * 
-		 * @throws InterruptedException, caught in run()
-		 */
-		public void killThread() {
-			this.thread.interrupt();
-		}
 	}
 }
