@@ -9,19 +9,17 @@ import Packets.PacketContent;
  * @author Tomas Barry
  * 
  */
-public class ProcessData {
+public class DataProcessor {
 	private String[] data;
 	private String target;
 	private boolean targetFound;
-
-	//	private Thread processingThread; ... maybe
 
 	/**
 	 * ProcessData constructor
 	 * 
 	 * @param data
 	 */
-	public ProcessData(byte[] data, String target) {
+	public DataProcessor(byte[] data, String target) {
 		this.data = (new String(data)).split("\n");
 		this.target = target;
 		this.targetFound = false;
@@ -46,10 +44,8 @@ public class ProcessData {
 	 * @return true: data does contain target
 	 */
 	public boolean processTheData(Client worker) {
-		//		processingThread = new Thread();
-		//		processingThread.start(); ... maybe...
 		for (String s : data) {
-			if (s.equals(getTarget())) {
+			if (s.trim().equals(getTarget())) {
 				targetFound = true;
 				sendSucessPacket(worker);
 				return true;

@@ -17,7 +17,7 @@ public class Server extends Node {
 	private DataAllocator dataAllocator;
 
 	private boolean taskComplete = false;
-	private String target = "Justin Beiber";
+	private String target = "nishant gupta";
 	private Terminal terminal;
 
 	/*
@@ -62,8 +62,6 @@ public class Server extends Node {
 					break;
 				case PacketContent.RESPONSE_PING:
 					connectionList.confirmPing(packet.getSocketAddress());
-					System.out.println("confirming ping from "
-							+ packet.getSocketAddress());
 					break;
 				case PacketContent.TASK_COMPLETE:
 					connectionList.terminateWorkers();
@@ -89,10 +87,9 @@ public class Server extends Node {
 		while (!pinging) {
 			this.wait(2000);
 			connectionList.ping();
-			terminal.println(connectionList.toString() + "all de workers");
-			terminal.println("$w3g = " + connectionList.numberOfConnections());
+			terminal.println("# of workers = "
+					+ connectionList.numberOfConnections());
 		}
-		System.out.println("Shouldn't get here");
 	}
 
 	public static void main(String[] args) {

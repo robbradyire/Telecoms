@@ -7,6 +7,7 @@ import java.net.SocketAddress;
 import java.net.SocketException;
 
 import tcdIO.Terminal;
+import Packets.AcknowledgeSetup;
 import Packets.GenericActionPacket;
 import Packets.GenericTimedActionPacket;
 import Packets.PacketContent;
@@ -19,14 +20,14 @@ import Packets.WorkloadPacket;
 public class Client extends Node {
 	public static final int DEFAULT_DST_PORT = 50001;
 	private static final String DEFAULT_DST_NODE = "localhost";
-	private Terminal terminal;
+	public Terminal terminal;
 	public InetSocketAddress dstAddress;
 	private boolean targetFound = false;
 	private GenericTimedActionPacket setupRequest;
 	private GenericTimedActionPacket sucessPacket;
 	private WorkRequest workRequest;
 	private GenericActionPacket actionPacket;
-	private ProcessData leDataProcessor;
+	private DataProcessor leDataProcessor;
 	private int statsNoOfNames;
 	private int statsNoOfWorkloads;
 	private int statsID;
@@ -59,6 +60,7 @@ public class Client extends Node {
 		switch (type) {
 			case PacketContent.WORKER_ADDED_ACK:
 				setupRequest.confirmSent();
+				target = ((AcknowledgeSetup) content).getTarget();
 				this.notify();
 				break;
 			case PacketContent.PING_WORKER:
@@ -69,7 +71,7 @@ public class Client extends Node {
 				break;
 			case PacketContent.WORKLOAD_PACKET:
 				this.statsNoOfWorkloads++;
-				leDataProcessor = new ProcessData(
+				leDataProcessor = new DataProcessor(
 						((WorkloadPacket) content).getData(), target);
 				leDataProcessor.processTheData(this);
 				statsNoOfNames += leDataProcessor.getData().length;
@@ -83,6 +85,7 @@ public class Client extends Node {
 				terminal.println("Total number of workload items given: "
 						+ statsNoOfWorkloads);
 				targetFound = true;
+				this.notify();
 				break;
 		}
 	}
@@ -95,6 +98,12 @@ public class Client extends Node {
 				PacketContent.ADD_WORKER_REQUEST);
 		setupRequest.send();
 		this.wait();
+		terminal.println("Added to list of workers");
+		while (!targetFound) {
+			workRequest = new WorkRequest(500, this);
+			workRequest.send();
+			this.wait();
+		}
 	}
 
 	/**
@@ -124,7 +133,7 @@ public class Client extends Node {
 			}
 			// srcAddress already in use, assign a new one
 			catch (java.net.BindException e) {
-				srcAddress += 1000;
+				srcAddress += 250;
 				srcAssigned = false;
 			}
 		}

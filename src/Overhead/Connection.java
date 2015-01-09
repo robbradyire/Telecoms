@@ -57,6 +57,15 @@ public class Connection {
 	}
 
 	/**
+	 * contains
+	 * is a worker in the list of workers
+	 * return : boolean on whether the worker is in the list
+	 */
+	public boolean contains(SocketAddress address) {
+		return connections.contains(address);
+	}
+
+	/**
 	 * ping
 	 * send a ping to all Workers currently connected to the Server
 	 */

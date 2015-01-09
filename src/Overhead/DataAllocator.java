@@ -12,8 +12,8 @@ import java.util.Queue;
 
 /**
  * 
- * @author Calvin Nolan
- *
+ * @author Calvin Nolan, Tomas Barry
+ * 
  */
 
 public class DataAllocator {
@@ -21,6 +21,7 @@ public class DataAllocator {
 	Queue<String> returnedStringQueue;
 	String[] fileString;
 	int currentPointer;
+	int minimumNameSize;
 
 	// Constructor
 	// -------------------------------------------------------------
@@ -31,9 +32,9 @@ public class DataAllocator {
 	public DataAllocator() {
 
 		returnedStringQueue = new LinkedList<String>();
-
+		minimumNameSize = 10;
 		currentPointer = 0;
-		String textFile = "namesShort.txt";
+		String textFile = "names.txt";
 		List<String> itemsName = new ArrayList<String>();
 
 		// Converting the text file into the string array fileString.
@@ -78,48 +79,50 @@ public class DataAllocator {
 	 *         the byte limitation given.
 	 */
 	public byte[] getBytes(int noOfBytesWanted) {
-		int prevPointer = currentPointer;
+		if (noOfBytesWanted > minimumNameSize) {
+			int prevPointer = currentPointer;
 
-		int currentByteSize = 0;
-		boolean isGreatestSize = false;
+			int currentByteSize = 0;
+			boolean isGreatestSize = false;
 
-		String namesToSend = "";
+			String namesToSend = "";
 
-		// Calculates how many names should be given from the queue.
-		while (!isGreatestSize && returnedStringQueue.peek() != null) {
-			byte[] a = (returnedStringQueue.peek()).getBytes();
+			// Calculates how many names should be given from the queue.
+			while (!isGreatestSize && returnedStringQueue.peek() != null) {
+				byte[] a = (returnedStringQueue.peek()).getBytes();
 
-			if (currentByteSize + a.length > noOfBytesWanted) {
-				isGreatestSize = true;
-			} else {
-				currentByteSize += a.length;
-				namesToSend += returnedStringQueue.remove();
+				if (currentByteSize + a.length > noOfBytesWanted) {
+					isGreatestSize = true;
+				}
+				else {
+					currentByteSize += a.length;
+					namesToSend += returnedStringQueue.remove();
+				}
 			}
-		}
 
-		// Calculates how many names should be given from the file of text.
-		while (!isGreatestSize && currentPointer < fileString.length) {
-			byte[] b = fileString[currentPointer].getBytes();
+			// Calculates how many names should be given from the file of text.
+			while (!isGreatestSize && currentPointer < fileString.length) {
+				byte[] b = fileString[currentPointer].getBytes();
 
-			if (currentByteSize + b.length > noOfBytesWanted) {
-				isGreatestSize = true;
-			} else {
-				currentByteSize += b.length;
-				currentPointer++;
+				if (currentByteSize + b.length > noOfBytesWanted) {
+					isGreatestSize = true;
+				}
+				else {
+					currentByteSize += b.length;
+					currentPointer++;
+				}
 			}
+
+			// Converts the names to send into a byte array.
+			for (int i = 0; prevPointer + i < currentPointer; i++) {
+				namesToSend += fileString[prevPointer + i];
+			}
+
+			byte[] bytesToSend = namesToSend.getBytes();
+
+			return bytesToSend;
 		}
-
-		// Converts the names to send into a byte array.
-		for (int i = 0; prevPointer + i < currentPointer; i++) {
-			namesToSend += fileString[prevPointer + i];
-		}
-
-		System.out.println("Giving bytes: \n" + namesToSend);
-
-		byte[] bytesToSend = namesToSend.getBytes();
-
-		return bytesToSend;
-
+		return "No Name".getBytes();
 	}
 
 	/**
@@ -165,17 +168,15 @@ public class DataAllocator {
 		else
 			return false;
 	}
-	
 
 	// Getter
 	// -------------------------------------------------------------
-	
+
 	/**
 	 * 
 	 * @return The total number of names to be processed.
 	 */
-	public int getNoOfNames()
-	{
+	public int getNoOfNames() {
 		return fileString.length;
 	}
 }

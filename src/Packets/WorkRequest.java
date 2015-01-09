@@ -21,7 +21,6 @@ import Overhead.Client;
 public class WorkRequest extends PacketContent {
 	private int capacity;
 	private boolean hasBeenSent;
-	private Timer timer;
 	private Client worker;
 
 	// Constructors
@@ -46,8 +45,8 @@ public class WorkRequest extends PacketContent {
 	 */
 	protected WorkRequest(ObjectInputStream oin) {
 		try {
-			this.type = WORKLOAD_REQUEST;
-			this.capacity = oin.readInt();
+			type = WORKLOAD_REQUEST;
+			capacity = oin.readInt();
 		}
 		catch (IOException e) {
 			System.out.println("Error in WorkRequest oin constructor");
@@ -66,7 +65,6 @@ public class WorkRequest extends PacketContent {
 			DatagramPacket packet = this.toDatagramPacket();
 			packet.setSocketAddress(this.worker.dstAddress);
 			this.worker.socket.send(packet);
-			this.timer = new Timer(this);
 		}
 		catch (SocketException e) {
 			// no action
@@ -84,7 +82,7 @@ public class WorkRequest extends PacketContent {
 	 */
 	protected void toObjectOutputStream(ObjectOutputStream oout) {
 		try {
-			oout.write(capacity);
+			oout.writeInt(capacity);
 		}
 		catch (IOException e) {
 			e.printStackTrace();
@@ -97,7 +95,6 @@ public class WorkRequest extends PacketContent {
 	 */
 	public void confirmRequest() {
 		this.hasBeenSent = true;
-		this.timer.killThread();
 	}
 
 	// Getters
