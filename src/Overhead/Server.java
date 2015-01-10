@@ -2,6 +2,7 @@ package Overhead;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.util.Queue;
 
 import tcdIO.Terminal;
 import Packets.AcknowledgeSetup;
@@ -17,8 +18,9 @@ public class Server extends Node {
 	private DataAllocator dataAllocator;
 
 	private boolean taskComplete = false;
-	private String target = "nishant gupta";
+	private String target = "felicia conley";
 	private Terminal terminal;
+	private Thread dataThread;
 
 	/*
 	 * constructor gives server a terminal and a socket starting its thread
@@ -54,8 +56,9 @@ public class Server extends Node {
 					break;
 				case PacketContent.WORKLOAD_REQUEST:
 					WorkRequest work = (WorkRequest) content;
-					int dataSize = work.getCapacity();
-					byte[] data = dataAllocator.getBytes(dataSize);
+					int requestedSize = work.getCapacity();
+					byte[] data = (dataAllocator.getBytes(requestedSize))
+							.getBytes();
 					workload = new WorkloadPacket(data,
 							packet.getSocketAddress(), this);
 					workload.send();
@@ -66,6 +69,7 @@ public class Server extends Node {
 				case PacketContent.TASK_COMPLETE:
 					connectionList.terminateWorkers();
 					taskComplete = true;
+					dataThread.interrupt();
 					this.notify();
 					break;
 			}
@@ -83,12 +87,14 @@ public class Server extends Node {
 	 */
 	public synchronized void start() throws Exception {
 		connectionList = new Connection(this);
-		pinging = false;
-		while (!pinging) {
-			this.wait(2000);
+		dataThread = new Thread(dataAllocator);
+		dataThread.start();
+		while (!taskComplete) {
+			this.wait(1000);
 			connectionList.ping();
 			terminal.println("# of workers = "
-					+ connectionList.numberOfConnections());
+					+ connectionList.numberOfConnections() + ". "
+					+ dataAllocator.getNoOfNames() + "/100,000,000");
 		}
 	}
 

@@ -24,16 +24,12 @@ public class Client extends Node {
 	public InetSocketAddress dstAddress;
 	private boolean targetFound = false;
 	private GenericTimedActionPacket setupRequest;
-	private GenericTimedActionPacket sucessPacket;
 	private WorkRequest workRequest;
 	private GenericActionPacket actionPacket;
 	private DataProcessor leDataProcessor;
 	private int statsNoOfNames;
 	private int statsNoOfWorkloads;
-	private int statsID;
-
 	private String target;
-	private int capacity = 50;
 
 	/**
 	 * Constructor Attempts to create socket at given port and create an
@@ -64,7 +60,6 @@ public class Client extends Node {
 				this.notify();
 				break;
 			case PacketContent.PING_WORKER:
-				terminal.println("Sending ping response");
 				actionPacket = new GenericActionPacket(getDestAddress(), this,
 						PacketContent.RESPONSE_PING);
 				actionPacket.send();
@@ -76,14 +71,11 @@ public class Client extends Node {
 				leDataProcessor.processTheData(this);
 				statsNoOfNames += leDataProcessor.getData().length;
 				leDataProcessor.processTheData(this);
+				terminal.println("Worked through " + statsNoOfNames
+						+ " names so far");
 				this.notify();
 				break;
 			case PacketContent.TERMINATE_WORK:
-				terminal.println("Work Completed. \n Your computer's statistics:");
-				terminal.println("Total number of names processed: "
-						+ statsNoOfNames);
-				terminal.println("Total number of workload items given: "
-						+ statsNoOfWorkloads);
 				targetFound = true;
 				this.notify();
 				break;
@@ -100,10 +92,14 @@ public class Client extends Node {
 		this.wait();
 		terminal.println("Added to list of workers");
 		while (!targetFound) {
-			workRequest = new WorkRequest(500, this);
+			workRequest = new WorkRequest(1000, this);
 			workRequest.send();
 			this.wait();
 		}
+		terminal.println("Work Completed. \n Your computer's statistics:");
+		terminal.println("Total number of names processed: " + statsNoOfNames);
+		terminal.println("Total number of workload items given: "
+				+ statsNoOfWorkloads);
 	}
 
 	/**

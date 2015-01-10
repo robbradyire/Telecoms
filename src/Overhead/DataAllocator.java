@@ -1,13 +1,9 @@
 package Overhead;
 
 import java.io.BufferedReader;
-import java.io.DataInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
+import java.io.FileReader;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -17,14 +13,11 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * 
  */
 
-public class DataAllocator {
-
-	ConcurrentLinkedQueue<String> returnedStringQueue;
-	ConcurrentLinkedQueue<String> itemsNameQueue;
-	
+public class DataAllocator implements Runnable {
+	ConcurrentLinkedQueue<String> namesQueue;
 	File file;
-	int minimumNameSize;
 	int namesProcessed;
+	int maxQueueSize;
 
 	// Constructor
 	// -------------------------------------------------------------
@@ -33,46 +26,37 @@ public class DataAllocator {
 	 * string array fileString.
 	 */
 	public DataAllocator() {
-
-		returnedStringQueue = new ConcurrentLinkedQueue<String>();
-		itemsNameQueue = new ConcurrentLinkedQueue<String>();
-		
-		namesProcessed = 0;
-		minimumNameSize = 10;
+		namesQueue = new ConcurrentLinkedQueue<String>();
 		String textFile = "names.txt";
-		
 		file = new File(textFile);
+		namesProcessed = 0;
+		maxQueueSize = 100000;
 	}
-	
-	public void processFile(){
 
-		// Converting the text file into the string array fileString.
+	// Methods
+	// -------------------------------------------------------------
+
+	public void run() {
 		try {
-
-			FileInputStream fstream_text = new FileInputStream(file);
-			DataInputStream data_input = new DataInputStream(fstream_text);
-			BufferedReader buffer = new BufferedReader(new InputStreamReader(
-					data_input));
+			BufferedReader buffer = new BufferedReader(new FileReader(file));
 			String str_line;
-
 			while ((str_line = buffer.readLine()) != null) {
-				str_line = str_line.trim();
-				if ((str_line.length() != 0)) {
-					itemsNameQueue.add(str_line + "\n");
+				if (namesQueue.size() > maxQueueSize) {
+					Thread.sleep(500);
+					System.out.println("Thread sleeping");
+				}
+				else {
+					namesQueue.add(str_line + "\n");
 				}
 			}
 			buffer.close();
-
 		}
-
 		// Catch exception if any
 		catch (Exception e) {
 			System.err.println("Error: " + e.getMessage());
 		}
 	}
 
-	// Methods
-	// -------------------------------------------------------------
 	/**
 	 * getBytes:
 	 * 
@@ -83,47 +67,16 @@ public class DataAllocator {
 	 * @return bytesToSend: The largest amount of names that can be sent under
 	 *         the byte limitation given.
 	 */
-	public byte[] getBytes(int noOfBytesWanted) {
-		if (noOfBytesWanted > minimumNameSize) {
-			
-			int currentByteSize = 0;
-			boolean isGreatestSize = false;
-
-			String namesToSend = "";
-
-			// Calculates how many names should be given from the queue.
-			while (!isGreatestSize && returnedStringQueue.peek() != null) {
-				byte[] a = (returnedStringQueue.peek()).getBytes();
-
-				if (currentByteSize + a.length > noOfBytesWanted) {
-					isGreatestSize = true;
-				}
-				else {
-					currentByteSize += a.length;
-					namesToSend += returnedStringQueue.remove();
-					namesProcessed++;
-				}
-			}
-
-			// Calculates how many names should be given from the file of text.
-			while (!isGreatestSize && (itemsNameQueue.peek() != null)) {
-				byte[] b = (itemsNameQueue.peek()).getBytes();
-
-				if (currentByteSize + b.length > noOfBytesWanted) {
-					isGreatestSize = true;
-				}
-				else {
-					currentByteSize += b.length;
-					namesToSend += itemsNameQueue.remove();
-					namesProcessed++;
-				}
-			}
-
-			byte[] bytesToSend = namesToSend.getBytes();
-
-			return bytesToSend;
+	public String getBytes(int noOfBytesWanted) {
+		int currentByteSize = 0;
+		StringBuilder namesToSend = new StringBuilder();
+		// Calculates how many names should be given from the queue.
+		while (currentByteSize < noOfBytesWanted && namesQueue.peek() != null) {
+			currentByteSize += namesQueue.peek().length();
+			namesToSend.append(namesQueue.remove());
+			namesProcessed++;
 		}
-		return "No Name".getBytes();
+		return namesToSend.toString();
 	}
 
 	/**
@@ -136,39 +89,12 @@ public class DataAllocator {
 	 * @param bytes
 	 */
 	public void returnBytes(byte[] bytes) {
-		
 		// Convert the bytes to a String.
-		String bytesAsString = new String(bytes);
-
+		String[] bytesAsString = (new String(bytes)).split("\n");
 		System.out.println("Returning bytes: \n" + bytesAsString);
-
-		int lastNameIndex = 0;
-
-		// Breaking up the String into the individual names and enqueuing them.
-		for (int i = 0; i < bytesAsString.length(); i++) {
-			if (bytesAsString.charAt(i) == '\n') {
-				returnedStringQueue.add(bytesAsString.substring(lastNameIndex,
-						i) + "\n");
-				lastNameIndex = i + 1;
-				namesProcessed--;
-			}
+		for (String s : bytesAsString) {
+			namesQueue.add(s);
 		}
-	}
-
-	/**
-	 * isCompleteFileSent:
-	 * 
-	 * Checks to see if the entire file has been distributed, including the data
-	 * in the queue.
-	 * 
-	 * @return true: If the pointer has reached the end of the list of names and
-	 *         the queue is empty.
-	 */
-	public boolean isCompleteFileSent() {
-		if (returnedStringQueue.peek() == null)
-			return true;
-		else
-			return false;
 	}
 
 	// Getter
