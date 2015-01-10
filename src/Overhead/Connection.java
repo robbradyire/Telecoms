@@ -21,6 +21,7 @@ import Packets.PacketContent;
 public class Connection {
 	private Server server;
 	private ConcurrentHashMap<SocketAddress, Integer> connections;
+	private ConcurrentHashMap<SocketAddress, byte[]> currentNames;
 	private int thresholdPing;
 
 	// Constructor
@@ -31,6 +32,7 @@ public class Connection {
 	public Connection(Server controller) {
 		this.server = controller;
 		this.connections = new ConcurrentHashMap<SocketAddress, Integer>();
+		this.currentNames = new ConcurrentHashMap<SocketAddress, byte[]>();
 		this.thresholdPing = 5;
 	}
 
@@ -77,6 +79,7 @@ public class Connection {
 			ping.send();
 			connections.put(worker, connections.get(worker) + 1); // update the ping count
 			if (connections.get(worker) > thresholdPing) {
+				server.dataAllocator.returnBytes(currentNames.get(worker));
 				connections.remove(worker);
 				System.out.println("Removing " + worker.toString()); // TODO remove before final version
 			}
@@ -126,6 +129,17 @@ public class Connection {
 	 */
 	public ConcurrentHashMap<SocketAddress, Integer> getConnections() {
 		return connections;
+	}
+	
+	/**
+	 * updateNames
+	 * updates the current names that a worker is working on
+	 * 
+	 * @param address
+	 * @param names
+	 */
+	public void updateNames(SocketAddress address, byte[] names) {
+		currentNames.put(address, names);
 	}
 
 	// toString

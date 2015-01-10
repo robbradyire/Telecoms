@@ -15,7 +15,7 @@ public class Server extends Node {
 	private Connection connectionList;
 	private boolean pinging = false;
 	private WorkloadPacket workload;
-	private DataAllocator dataAllocator;
+	DataAllocator dataAllocator;
 
 	private boolean taskComplete = false;
 	private String target = "felicia conley";
@@ -59,6 +59,7 @@ public class Server extends Node {
 					int requestedSize = work.getCapacity();
 					byte[] data = (dataAllocator.getBytes(requestedSize))
 							.getBytes();
+					connectionList.updateNames(packet.getSocketAddress(), data);
 					workload = new WorkloadPacket(data,
 							packet.getSocketAddress(), this);
 					workload.send();
