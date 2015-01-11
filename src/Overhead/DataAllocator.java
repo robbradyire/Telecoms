@@ -42,7 +42,7 @@ public class DataAllocator implements Runnable {
 			String str_line;
 			while ((str_line = buffer.readLine()) != null) {
 				if (namesQueue.size() > maxQueueSize) {
-					Thread.sleep(500);
+					Thread.sleep(150);
 					System.out.println("Thread sleeping");
 				}
 				else {

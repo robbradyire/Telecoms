@@ -27,7 +27,7 @@ public class Connection {
 	// Constructor
 	// ---------------------------------------------------------------------
 	/**
-	 * Connection onstructor
+	 * Connection constructor
 	 */
 	public Connection(Server controller) {
 		this.server = controller;
@@ -79,9 +79,8 @@ public class Connection {
 			ping.send();
 			connections.put(worker, connections.get(worker) + 1); // update the ping count
 			if (connections.get(worker) > thresholdPing) {
-				server.dataAllocator.returnBytes(currentNames.get(worker));
+				server.returnNames(currentNames.get(worker));
 				connections.remove(worker);
-				System.out.println("Removing " + worker.toString()); // TODO remove before final version
 			}
 		}
 	}
@@ -130,7 +129,7 @@ public class Connection {
 	public ConcurrentHashMap<SocketAddress, Integer> getConnections() {
 		return connections;
 	}
-	
+
 	/**
 	 * updateNames
 	 * updates the current names that a worker is working on

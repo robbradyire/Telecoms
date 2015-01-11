@@ -21,7 +21,7 @@ public class Timer implements Runnable {
 	 */
 	public Timer(PacketContent packet) {
 		this.packet = packet;
-		this.waitTime = 500;
+		this.waitTime = 150;
 		this.thread = new Thread(this);
 		this.thread.start();
 	}

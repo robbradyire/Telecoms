@@ -2,6 +2,7 @@ package Overhead;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.SocketAddress;
 import java.util.Queue;
 
 import tcdIO.Terminal;
@@ -15,10 +16,10 @@ public class Server extends Node {
 	private Connection connectionList;
 	private boolean pinging = false;
 	private WorkloadPacket workload;
-	DataAllocator dataAllocator;
+	private DataAllocator dataAllocator;
 
 	private boolean taskComplete = false;
-	private String target = "felicia conley";
+	private String target = "yuka furuta";
 	private Terminal terminal;
 	private Thread dataThread;
 
@@ -81,6 +82,18 @@ public class Server extends Node {
 	}
 
 	/**
+	 * returnNames
+	 * when a worker is assumed to no longer be active the data that it was
+	 * processing needs to be put back into the dataAllocator queue
+	 * 
+	 * @param returnedNames: byte array of the names to be added back into the
+	 *        dataAllocator queue
+	 */
+	public void returnNames(byte[] returnedNames) {
+		dataAllocator.returnBytes(returnedNames);
+	}
+
+	/**
 	 * start
 	 * controls sequence of operations performed by the Server
 	 * 
@@ -91,7 +104,7 @@ public class Server extends Node {
 		dataThread = new Thread(dataAllocator);
 		dataThread.start();
 		while (!taskComplete) {
-			this.wait(1000);
+			this.wait(250);
 			connectionList.ping();
 			terminal.println("# of workers = "
 					+ connectionList.numberOfConnections() + ". "
