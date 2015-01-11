@@ -23,13 +23,20 @@ public class Stopwatch {
      */
     public Stopwatch() {
         start = System.currentTimeMillis();
-    } 
+    }
+    
+    public Stopwatch(int i) {
+    	start = (long) 0.0;
+    }
 
 
    /**
      * Return elapsed time (in seconds) since this object was created.
      */
     public double elapsedTime() {
+    	if (start == (long) 0.0) {
+    		return 0.0;
+    	}
         long now = System.currentTimeMillis();
         return (now - start) / 1000.0;
     }

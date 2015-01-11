@@ -1,6 +1,7 @@
 package Overhead;
 
 import java.net.SocketAddress;
+import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
 import Packets.GenericActionPacket;
@@ -22,6 +23,8 @@ public class Connection {
 	private Server server;
 	private ConcurrentHashMap<SocketAddress, Integer> connections;
 	private ConcurrentHashMap<SocketAddress, byte[]> currentNames;
+	private ArrayList<SocketAddress> listOfWorkers;
+	private Statistics stats;
 	private int thresholdPing;
 
 	// Constructor
@@ -34,6 +37,8 @@ public class Connection {
 		this.connections = new ConcurrentHashMap<SocketAddress, Integer>();
 		this.currentNames = new ConcurrentHashMap<SocketAddress, byte[]>();
 		this.thresholdPing = 5;
+		listOfWorkers = new ArrayList<SocketAddress>();
+		stats = new Statistics();
 	}
 
 	// Methods
@@ -46,6 +51,24 @@ public class Connection {
 	 */
 	public void addConnection(SocketAddress clientSocket) {
 		connections.put(clientSocket, 0);
+		listOfWorkers.add(clientSocket);
+		stats.addWorker();
+	}
+	
+	/**
+	 * getID
+	 * gets the ID of a certain address
+	 * 
+	 * @param address
+	 * @return id of the input address
+	 */
+	private int getID(SocketAddress address) {
+		for (int i = listOfWorkers.size() - 1; i >= 0; i--) {
+			if (listOfWorkers.get(i) == address) {
+				return i;
+			}
+		}
+		return 0;
 	}
 
 	/**
@@ -79,7 +102,11 @@ public class Connection {
 			ping.send();
 			connections.put(worker, connections.get(worker) + 1); // update the ping count
 			if (connections.get(worker) > thresholdPing) {
-				server.returnNames(currentNames.get(worker));
+				byte[] names = currentNames.get(worker);
+				server.returnNames(names);
+				int id = this.getID(worker);
+				stats.endWorker(id);
+				stats.updateStats(id, names.length);
 				connections.remove(worker);
 			}
 		}
@@ -102,8 +129,10 @@ public class Connection {
 	 */
 	public void terminateWorkers() {
 		for (SocketAddress worker : connections.keySet()) {
+			stats.updateStats(this.getID(worker), currentNames.get(worker).length);
 			terminateWorker(worker);
 		}
+		server.print(stats.toString());
 	}
 
 	/**
@@ -138,6 +167,11 @@ public class Connection {
 	 * @param names
 	 */
 	public void updateNames(SocketAddress address, byte[] names) {
+		if (currentNames.containsKey(address)) {
+			int id = this.getID(address);
+			int length = currentNames.get(address).length;
+			stats.updateStats(id, length);
+		}
 		currentNames.put(address, names);
 	}
 

@@ -18,7 +18,6 @@ import Packets.*;
 
 public class Statistics {
 	
-	private Server controller;
 	private int numberOfWorkers;
 	private ArrayList<Integer> numberOfNamesSearched;
 	private ArrayList<Stopwatch> timers;
@@ -33,8 +32,7 @@ public class Statistics {
 	 * 
 	 * @param server
 	 */
-	public Statistics(Server server) {
-		this.controller = server;
+	public Statistics() {
 		this.numberOfWorkers = 0;
 		this.numberOfNamesSearched = new ArrayList<Integer>();
 		this.timers = new ArrayList<Stopwatch>();
@@ -42,8 +40,7 @@ public class Statistics {
 		this.namesSearchedTotal = 0;
 		this.percentOfWorkDone = 0.0;
 		
-		namesToSearch = 1000;	// TODO: get the total number of names 
-								//		from the controller and put it in here
+		namesToSearch = 100000000;
 	}
 	
 	/**
@@ -52,14 +49,11 @@ public class Statistics {
 	 * 
 	 * @return the ID of the new Worker
 	 */
-	public int addWorker() {
-		int id = numberOfWorkers;
+	public void addWorker() {
 		numberOfNamesSearched.add(0);
 		timers.add(new Stopwatch());
 		timeSpent.add(0.0);
 		numberOfWorkers++;
-		
-		return id;
 	}
 	
 	/**
@@ -76,6 +70,7 @@ public class Statistics {
 		timeSpent.set(id, ((double)timeSpent.get(id) + time));
 		namesSearchedTotal += namesSearched;
 		percentOfWorkDone += (double) namesSearched / (double) namesToSearch;
+		this.resumeWorker(id);
 	}
 	
 	/**
@@ -86,6 +81,15 @@ public class Statistics {
 	 */
 	public void resumeWorker(int id) {
 		timers.set(id, new Stopwatch());
+	}
+	
+	/**
+	 * endWorker()
+	 * puts an empty timer in the ArrayList of timers
+	 * @param id
+	 */
+	public void endWorker(int id) {
+		timers.set(id, new Stopwatch(0));
 	}
 	
 	
@@ -121,5 +125,14 @@ public class Statistics {
 			total += (double) time;
 		}
 		return total;
+	}
+	
+	public String toString() {
+		String output = "";
+		output += "Total names searched: " + this.numberOfNamesSearched() + "\n";
+		output += "Total time spent by workers: " + this.totalTime() + " seconds\n";
+		output += "Percentage of names checked: " + (int) this.percentOfWorkDone() + "%";
+		
+		return output;
 	}
 }

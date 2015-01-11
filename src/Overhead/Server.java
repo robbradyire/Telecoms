@@ -19,7 +19,7 @@ public class Server extends Node {
 	private DataAllocator dataAllocator;
 
 	private boolean taskComplete = false;
-	private String target = "yuka furuta";
+	private String target = "nishant gupta";
 	private Terminal terminal;
 	private Thread dataThread;
 
@@ -110,6 +110,10 @@ public class Server extends Node {
 					+ connectionList.numberOfConnections() + ". "
 					+ dataAllocator.getNoOfNames() + "/100,000,000");
 		}
+	}
+	
+	public void print(String s) {
+		terminal.println(s);
 	}
 
 	public static void main(String[] args) {
