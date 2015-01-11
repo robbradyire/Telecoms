@@ -121,10 +121,8 @@ public class WorkloadPacket extends PacketContent {
 		return new String(data);
 	}
 
-
-	@Override
+	@Deprecated
 	protected boolean hasBeenSent() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 }

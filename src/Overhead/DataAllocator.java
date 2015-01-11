@@ -3,8 +3,6 @@ package Overhead;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.util.LinkedList;
-import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
@@ -14,10 +12,10 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  */
 
 public class DataAllocator implements Runnable {
-	ConcurrentLinkedQueue<String> namesQueue;
-	File file;
-	int namesProcessed;
-	int maxQueueSize;
+	private ConcurrentLinkedQueue<String> namesQueue;
+	private File file;
+	private int namesProcessed;
+	private int maxQueueSize;
 
 	// Constructor
 	// -------------------------------------------------------------
@@ -36,6 +34,14 @@ public class DataAllocator implements Runnable {
 	// Methods
 	// -------------------------------------------------------------
 
+	/**
+	 * run
+	 * method run in a separate thread initiated by the Server. This method runs
+	 * through the entire file adding the contents to the queue for allocation
+	 * to Workers. The thread will be interrupted if the target name has been
+	 * found by a Worker, otherwise it will keep processing the file until it is
+	 * done reading the file.
+	 */
 	public void run() {
 		try {
 			BufferedReader buffer = new BufferedReader(new FileReader(file));
@@ -43,7 +49,6 @@ public class DataAllocator implements Runnable {
 			while ((str_line = buffer.readLine()) != null) {
 				if (namesQueue.size() > maxQueueSize) {
 					Thread.sleep(150);
-					System.out.println("Thread sleeping");
 				}
 				else {
 					namesQueue.add(str_line + "\n");
@@ -70,7 +75,6 @@ public class DataAllocator implements Runnable {
 	public String getBytes(int noOfBytesWanted) {
 		int currentByteSize = 0;
 		StringBuilder namesToSend = new StringBuilder();
-		// Calculates how many names should be given from the queue.
 		while (currentByteSize < noOfBytesWanted && namesQueue.peek() != null) {
 			currentByteSize += namesQueue.peek().length();
 			namesToSend.append(namesQueue.remove());
@@ -89,11 +93,10 @@ public class DataAllocator implements Runnable {
 	 * @param bytes
 	 */
 	public void returnBytes(byte[] bytes) {
-		// Convert the bytes to a String.
 		String[] bytesAsString = (new String(bytes)).split("\n");
-		System.out.println("Returning bytes: \n" + bytesAsString);
 		for (String s : bytesAsString) {
 			namesQueue.add(s);
+			namesProcessed--;
 		}
 	}
 
@@ -101,7 +104,6 @@ public class DataAllocator implements Runnable {
 	// -------------------------------------------------------------
 
 	/**
-	 * 
 	 * @return The total number of names to be processed.
 	 */
 	public int getNoOfNames() {

@@ -36,7 +36,6 @@ public class Timer implements Runnable {
 		try {
 			Thread.sleep(waitTime);
 			if (!((PacketContent) packet).hasBeenSent()) {
-				System.out.println("Setup request resent");
 				((PacketContent) packet).send();
 			}
 		}

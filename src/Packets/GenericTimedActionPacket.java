@@ -2,7 +2,6 @@ package Packets;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
 import java.net.SocketAddress;
 
@@ -16,11 +15,13 @@ import Overhead.Node;
  *         A packet that sends info either from one Node to another Node. The
  *         packet indicates that some action must be taken by the receiver. It
  *         does make use of a Timer to operate.
+ *         This class extends GenericActionPacket. The only differences between
+ *         this class and the super class are the Timer class variable, the send
+ *         method that initiates the Timer and the confirmSent method that
+ *         interrupts the Timer
  * 
  */
-public class GenericTimedActionPacket extends PacketContent {
-	private Node sender;
-	private SocketAddress destAddress;
+public class GenericTimedActionPacket extends GenericActionPacket {
 	private Timer timer;
 
 	// Constructors
@@ -35,9 +36,7 @@ public class GenericTimedActionPacket extends PacketContent {
 	 */
 	public GenericTimedActionPacket(SocketAddress receiver, Node sender,
 			int type) {
-		this.type = type;
-		this.destAddress = receiver;
-		this.sender = sender;
+		super(receiver, sender, type);
 	}
 
 	/**
@@ -46,12 +45,11 @@ public class GenericTimedActionPacket extends PacketContent {
 	 * @param oin: ObjectInputStream that contains data about the packet
 	 */
 	public GenericTimedActionPacket(ObjectInputStream oin, int type) {
-		this.type = type;
+		super(oin, type);
 	}
 
 	// Methods
-	// ------------------------------------------------------------------
-
+	// -------------------------------------------------------------------
 	/**
 	 * send
 	 * sends the Packet to a Node
@@ -69,16 +67,6 @@ public class GenericTimedActionPacket extends PacketContent {
 	}
 
 	/**
-	 * tooObjectOutputStream
-	 * writes content into an ObjectOutputStream
-	 * 
-	 * @param out: output stream to write
-	 */
-	public void toObjectOutputStream(ObjectOutputStream out) {
-		// nothing to write
-	}
-
-	/**
 	 * confirmSent
 	 * Called by the sending Node. Indicates that the Packet has successfully
 	 * been sent. This is determined by the sending Node
@@ -86,44 +74,5 @@ public class GenericTimedActionPacket extends PacketContent {
 	public void confirmSent() {
 		this.acknowledged = true;
 		this.timer.killThread();
-	}
-
-	// Getters
-	// -------------------------------------------------------------
-
-	/**
-	 * getDestAddress
-	 * returns the destination address of the Packet
-	 * 
-	 * @return destAddress: the destination address of the Packet
-	 */
-	public SocketAddress getDestAddress() {
-		return destAddress;
-	}
-
-	/**
-	 * getSenderAddress
-	 * returns the sender address of the Packet
-	 * 
-	 * @return senderAddress: the address of the sending Node of the Packet
-	 */
-	public SocketAddress getSenderAddress() {
-		return sender.socket.getLocalSocketAddress();
-	}
-
-	// toString
-	// ------------------------------------------------------------------------
-	/**
-	 * toString
-	 * returns status of Packet as a string
-	 * 
-	 * @return "GenericActionPacket to x has been sent": the Packet has been
-	 *         sent
-	 * @return "GenericActionPacket to x has not been sent" the Packet has not
-	 *         been sent
-	 */
-	public String toString() {
-		return "GenericActionPacket to " + getDestAddress().toString()
-				+ (hasBeenSent() ? " has " : " has not ") + "been sent.";
 	}
 }

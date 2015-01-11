@@ -16,8 +16,6 @@ public class DataProcessor {
 
 	/**
 	 * ProcessData constructor
-	 * 
-	 * @param data
 	 */
 	public DataProcessor(byte[] data, String target) {
 		this.data = (new String(data)).split("\n");
@@ -26,7 +24,8 @@ public class DataProcessor {
 	}
 
 	/**
-	 * 
+	 * sendSucessPacket
+	 * sent when the Client has found the target and completed the task
 	 */
 	public void sendSucessPacket(Client worker) {
 		GenericTimedActionPacket sucessPacket = new GenericTimedActionPacket(

@@ -1,87 +1,129 @@
-/***
- * -------Classes----------
- * - Node 
- *	-> Need to implement
- * 	-> (Base provided)
- *
- * - Client
- *	-> Need to implement
- * 	-> (Base provided)
- *
- * - Server
- *	-> Need to implement
- * 	-> (Base provided)
- *
- * - PacketContent
- *	-> Need to implement
- * 	-> (Base provided)
- *
- * - WorkRequest
- *	-> Client side class
- *	-> Request includes how much work Client can currently handle (not fixed)
- *	-> On Server Side request indicates Clients workload doesn't contain target
- *
- * - Connection
- *	-> Need to implement
- *	-> Server and Client class
- *	-> Responsible for sending PingRequests and processing PingResponses and WorkRequests and SucessPacket
- *	-> Communicates to Server how big a WorkloadPacket to send and to which Client
- *
- * - Timer
- *	-> AbstractTimer Class added
- *	-> Look at end of file for example use
- *
- * - PingRequest
- *	-> Server side class
- *	-> Controlled in Connection class
- *	-> Sends a ping request to the Client
- *	-> Uses a Timer
- *
- * - PingResponse
- *	-> Need to implemet
- *	-> Client side class
- *	-> Controlled in Connection class
- *	-> Sends a response upon receipt of a PingRequest
- *
- * - WorkloadPacket
- *	-> Server side class
- *	-> Server assembles workload based on WorkRequest data
- *	-> Server sends WorkloadPacket with workload and other data
- *	-> Client takes WorkLoadPacket and processes it in ProcessData
- *
- * - ProcessData
- *	-> Need to implement
- *	-> Client side class
- *	-> Client takes relevent data from WorkloadPacket class
- *	-> Cleint scans workload for target
- *	-> Returns boolean based on sucess or failure of getting target
- *
- * - SucessPacket
- *	-> Need to implement
- *	-> Client side class
- *	-> If ProcessData suceeds in finding target Client sends SucessPacket to Server
- *	-> If Server receives SucessPacket sends TerminateWork message to all Clients.
- *	-> Server processes SucessPacket in Connection class
- *
- * - AcknowledgeReceipt
- *	-> Need to implement
- *	-> Client side class
- *	-> Client must acknowledge the receipt of WorkLoadPacket so that the Server doesn't resend it
- *
- * - Statistics (Abstract class)
- *	-> Maintains data on workload processed
- *
- * - ClientStatistics
- * 	-> Maintains data about individual worker (work processed, current workload etc)
- *
- * - ServerStatistics
- * 	-> Maintains data on who has done how much and is currently doing what etc
- *
- * - TerminateWork
- *	-> Need to implement
- *	-> Client side class
- *	-> If Client finds target in Workload it must send
- *	-> Indicates to Server that no more work needs to be done
- *
- * ------------------------
+package Packets;
+
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.DatagramPacket;
+import java.net.SocketAddress;
+
+import Overhead.Node;
+
+/**
+ * @author Tomas Barry
+ * 
+ *         GenericTimedActionPacket
+ * 
+ *         A packet that sends info either from one Node to another Node. The
+ *         packet indicates that some action must be taken by the receiver. It
+ *         does make use of a Timer to operate.
+ * 
  */
+public class GenericTimedActionPacket extends PacketContent {
+	private Node sender;
+	private SocketAddress destAddress;
+	private Timer timer;
+
+	// Constructors
+	// -------------------------------------------------------------------
+
+	/**
+	 * GenericTimedActionPacket constructor
+	 * 
+	 * @param receiver: destination address of the packet
+	 * @param sender: reference to the sender Node to allow internal sending
+	 * @param type: the type of the packet
+	 */
+	public GenericTimedActionPacket(SocketAddress receiver, Node sender,
+			int type) {
+		this.type = type;
+		this.destAddress = receiver;
+		this.sender = sender;
+	}
+
+	/**
+	 * GenericTimedActionPacket constructor
+	 * 
+	 * @param oin: ObjectInputStream that contains data about the packet
+	 */
+	public GenericTimedActionPacket(ObjectInputStream oin, int type) {
+		this.type = type;
+	}
+
+	// Methods
+	// ------------------------------------------------------------------
+
+	/**
+	 * send
+	 * sends the Packet to a Node
+	 */
+	public void send() {
+		try {
+			DatagramPacket packet = this.toDatagramPacket();
+			packet.setSocketAddress(this.getDestAddress());
+			this.sender.socket.send(packet);
+			this.timer = new Timer(this);
+		}
+		catch (IOException e) {
+			// no action
+		}
+	}
+
+	/**
+	 * tooObjectOutputStream
+	 * writes content into an ObjectOutputStream
+	 * 
+	 * @param out: output stream to write
+	 */
+	public void toObjectOutputStream(ObjectOutputStream out) {
+		// nothing to write
+	}
+
+	/**
+	 * confirmSent
+	 * Called by the sending Node. Indicates that the Packet has successfully
+	 * been sent. This is determined by the sending Node
+	 */
+	public void confirmSent() {
+		this.acknowledged = true;
+		this.timer.killThread();
+	}
+
+	// Getters
+	// -------------------------------------------------------------
+
+	/**
+	 * getDestAddress
+	 * returns the destination address of the Packet
+	 * 
+	 * @return destAddress: the destination address of the Packet
+	 */
+	public SocketAddress getDestAddress() {
+		return destAddress;
+	}
+
+	/**
+	 * getSenderAddress
+	 * returns the sender address of the Packet
+	 * 
+	 * @return senderAddress: the address of the sending Node of the Packet
+	 */
+	public SocketAddress getSenderAddress() {
+		return sender.socket.getLocalSocketAddress();
+	}
+
+	// toString
+	// ------------------------------------------------------------------------
+	/**
+	 * toString
+	 * returns status of Packet as a string
+	 * 
+	 * @return "GenericActionPacket to x has been sent": the Packet has been
+	 *         sent
+	 * @return "GenericActionPacket to x has not been sent" the Packet has not
+	 *         been sent
+	 */
+	public String toString() {
+		return "GenericActionPacket to " + getDestAddress().toString()
+				+ (hasBeenSent() ? " has " : " has not ") + "been sent.";
+	}
+}

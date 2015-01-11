@@ -63,7 +63,7 @@ public class WorkRequest extends PacketContent {
 	public void send() {
 		try {
 			DatagramPacket packet = this.toDatagramPacket();
-			packet.setSocketAddress(this.worker.dstAddress);
+			packet.setSocketAddress(this.worker.getDestAddress());
 			this.worker.socket.send(packet);
 		}
 		catch (SocketException e) {
@@ -132,6 +132,6 @@ public class WorkRequest extends PacketContent {
 	 */
 	public String toString() {
 		return "Request of size " + getCapacity() + "to "
-				+ worker.DEFAULT_DST_PORT + "from " + worker.dstAddress;
+				+ worker.getPortNumber() + "from " + worker.getDestAddress();
 	}
 }

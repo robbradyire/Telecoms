@@ -1,23 +1,24 @@
 package Overhead;
+
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 
-import Packets.*;
-
-/* TODO: When adding a new Client, the Server needs to send it it's ID in
- * 		the WorkloadPacket and then when the Client is finished the work,
- * 		it needs to send it's own ID along with it's statistics back to the
- * 		Server so that they can be updated in the server Statistics.
-*/
+/*
+ * TODO: When adding a new Client, the Server needs to send it it's ID in
+ * the WorkloadPacket and then when the Client is finished the work,
+ * it needs to send it's own ID along with it's statistics back to the
+ * Server so that they can be updated in the server Statistics.
+ */
 
 /**
  * Statistics
  * 
  * @author Robert Brady
- *
+ * 
  */
 
 public class Statistics {
-	
+
 	private int numberOfWorkers;
 	private ArrayList<Integer> numberOfNamesSearched;
 	private ArrayList<Stopwatch> timers;
@@ -25,7 +26,7 @@ public class Statistics {
 	private int namesSearchedTotal;
 	private double percentOfWorkDone;
 	private int namesToSearch;
-	
+
 	/**
 	 * Statistics
 	 * A Class to store and update the Servers statistics
@@ -39,10 +40,10 @@ public class Statistics {
 		this.timeSpent = new ArrayList<Double>();
 		this.namesSearchedTotal = 0;
 		this.percentOfWorkDone = 0.0;
-		
+
 		namesToSearch = 100000000;
 	}
-	
+
 	/**
 	 * addWorker()
 	 * adds a worker to the statistics, and starts it's Timer
@@ -55,7 +56,7 @@ public class Statistics {
 		timeSpent.add(0.0);
 		numberOfWorkers++;
 	}
-	
+
 	/**
 	 * updateStats()
 	 * Updates the stats for a particular Worker
@@ -64,15 +65,15 @@ public class Statistics {
 	 * @param namesSearched (the number of names that the Worker has searched
 	 */
 	public void updateStats(int id, int namesSearched) {
-		numberOfNamesSearched.set(id, 
-				((int)numberOfNamesSearched.get(id)) + namesSearched);
+		numberOfNamesSearched.set(id, ((int) numberOfNamesSearched.get(id))
+				+ namesSearched);
 		double time = (double) timers.get(id).elapsedTime();
-		timeSpent.set(id, ((double)timeSpent.get(id) + time));
+		timeSpent.set(id, ((double) timeSpent.get(id) + time));
 		namesSearchedTotal += namesSearched;
 		percentOfWorkDone += (double) namesSearched / (double) namesToSearch;
 		this.resumeWorker(id);
 	}
-	
+
 	/**
 	 * resumeWorker()
 	 * Resumes the timer for a particular Worker
@@ -82,18 +83,17 @@ public class Statistics {
 	public void resumeWorker(int id) {
 		timers.set(id, new Stopwatch());
 	}
-	
+
 	/**
 	 * endWorker()
 	 * puts an empty timer in the ArrayList of timers
+	 * 
 	 * @param id
 	 */
 	public void endWorker(int id) {
 		timers.set(id, new Stopwatch(0));
 	}
-	
-	
-	
+
 	/**
 	 * numberOfNamesSearched()
 	 * 
@@ -102,7 +102,7 @@ public class Statistics {
 	public int numberOfNamesSearched() {
 		return namesSearchedTotal;
 	}
-	
+
 	/**
 	 * percentageOfWorkDone()
 	 * 
@@ -111,7 +111,7 @@ public class Statistics {
 	public double percentOfWorkDone() {
 		return percentOfWorkDone;
 	}
-	
+
 	/**
 	 * totalTime()
 	 * Adds up all of the time that the individual workers have spent
@@ -126,13 +126,22 @@ public class Statistics {
 		}
 		return total;
 	}
-	
+
+	/**
+	 * toString
+	 * returns the final Server statistics in a format to display in the
+	 * terminal. The time taken is rounded to 4 decimal places
+	 */
 	public String toString() {
 		String output = "";
-		output += "Total names searched: " + this.numberOfNamesSearched() + "\n";
-		output += "Total time spent by workers: " + this.totalTime() + " seconds\n";
-		output += "Percentage of names checked: " + (int) this.percentOfWorkDone() + "%";
-		
+		DecimalFormat formatter = new DecimalFormat("#.####");
+		output += "Total names searched: " + this.numberOfNamesSearched()
+				+ "\n";
+		output += "Total time spent by workers: "
+				+ formatter.format(this.totalTime()) + " seconds\n";
+		output += "Percentage of names checked: "
+				+ (int) this.percentOfWorkDone() + "%";
+
 		return output;
 	}
 }

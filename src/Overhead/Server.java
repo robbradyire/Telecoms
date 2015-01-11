@@ -2,8 +2,6 @@ package Overhead;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.SocketAddress;
-import java.util.Queue;
 
 import tcdIO.Terminal;
 import Packets.AcknowledgeSetup;
@@ -12,16 +10,15 @@ import Packets.WorkRequest;
 import Packets.WorkloadPacket;
 
 public class Server extends Node {
-	public static final int DEFAULT_PORT = 50001;
-	private Connection connectionList;
-	private boolean pinging = false;
-	private WorkloadPacket workload;
-	private DataAllocator dataAllocator;
-
+	//	private String target = "nishant gupta";
+	private final String target = "jimmy rustler";
+	private static final int DEFAULT_PORT = 50001;
 	private boolean taskComplete = false;
-	private String target = "nishant gupta";
 	private Terminal terminal;
-	private Thread dataThread;
+	private WorkloadPacket workload;
+	private Connection connectionList;
+	private Thread dataAllocatorThread;
+	private DataAllocator dataAllocator;
 
 	/*
 	 * constructor gives server a terminal and a socket starting its thread
@@ -45,39 +42,45 @@ public class Server extends Node {
 	 *        : the packet received
 	 */
 	public synchronized void onReceipt(DatagramPacket packet) {
-		if (!taskComplete) {
-			PacketContent content = PacketContent.fromDatagramPacket(packet);
-			int type = content.getType();
-			switch (type) {
-				case PacketContent.ADD_WORKER_REQUEST:
-					connectionList.addConnection(packet.getSocketAddress());
-					AcknowledgeSetup ack = new AcknowledgeSetup(this,
-							packet.getSocketAddress(), target);
-					ack.send();
-					break;
-				case PacketContent.WORKLOAD_REQUEST:
-					WorkRequest work = (WorkRequest) content;
-					int requestedSize = work.getCapacity();
-					byte[] data = (dataAllocator.getBytes(requestedSize))
-							.getBytes();
-					connectionList.updateNames(packet.getSocketAddress(), data);
-					workload = new WorkloadPacket(data,
-							packet.getSocketAddress(), this);
-					workload.send();
-					break;
-				case PacketContent.RESPONSE_PING:
-					connectionList.confirmPing(packet.getSocketAddress());
-					break;
-				case PacketContent.TASK_COMPLETE:
-					connectionList.terminateWorkers();
-					taskComplete = true;
-					dataThread.interrupt();
-					this.notify();
-					break;
+		try {
+			if (!taskComplete) {
+				PacketContent content = PacketContent
+						.fromDatagramPacket(packet);
+				int type = content.getType();
+				switch (type) {
+					case PacketContent.ADD_WORKER_REQUEST:
+						connectionList.addConnection(packet.getSocketAddress());
+						AcknowledgeSetup ack = new AcknowledgeSetup(this,
+								packet.getSocketAddress(), target);
+						ack.send();
+						break;
+					case PacketContent.WORKLOAD_REQUEST:
+						WorkRequest work = (WorkRequest) content;
+						int requestedSize = work.getCapacity();
+						byte[] data = (dataAllocator.getBytes(requestedSize))
+								.getBytes();
+						connectionList.updateNames(packet.getSocketAddress(),
+								data);
+						workload = new WorkloadPacket(data,
+								packet.getSocketAddress(), this);
+						workload.send();
+						break;
+					case PacketContent.RESPONSE_PING:
+						connectionList.confirmPing(packet.getSocketAddress());
+						break;
+					case PacketContent.TASK_COMPLETE:
+						connectionList.terminateWorkers();
+						taskComplete = true;
+						dataAllocatorThread.interrupt();
+						this.notify();
+						break;
+				}
+			}
+			else {
+				connectionList.terminateWorker(packet.getSocketAddress());
 			}
 		}
-		else {
-			connectionList.terminateWorker(packet.getSocketAddress());
+		catch (NullPointerException e) {
 		}
 	}
 
@@ -94,6 +97,16 @@ public class Server extends Node {
 	}
 
 	/**
+	 * getPortNumber
+	 * returns the port of the Server
+	 * 
+	 * @return dstAddress: the port number of the Server
+	 */
+	public int getPortNumber() {
+		return DEFAULT_PORT;
+	}
+
+	/**
 	 * start
 	 * controls sequence of operations performed by the Server
 	 * 
@@ -101,8 +114,8 @@ public class Server extends Node {
 	 */
 	public synchronized void start() throws Exception {
 		connectionList = new Connection(this);
-		dataThread = new Thread(dataAllocator);
-		dataThread.start();
+		dataAllocatorThread = new Thread(dataAllocator);
+		dataAllocatorThread.start();
 		while (!taskComplete) {
 			this.wait(250);
 			connectionList.ping();
@@ -111,7 +124,7 @@ public class Server extends Node {
 					+ dataAllocator.getNoOfNames() + "/100,000,000");
 		}
 	}
-	
+
 	public void print(String s) {
 		terminal.println(s);
 	}

@@ -123,13 +123,12 @@ public class AcknowledgeSetup extends PacketContent {
 	 * @return "AcknowledgeSetup packet from x to y"
 	 */
 	public String toString() {
-		return "AcknowledgeSetup packet from " + server.DEFAULT_PORT + " to "
-				+ getDestAddress();
+		return "AcknowledgeSetup packet from " + server.getPortNumber()
+				+ " to " + getDestAddress();
 	}
 
-	@Override
+	@Deprecated
 	protected boolean hasBeenSent() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 }

@@ -19,8 +19,8 @@ import Overhead.Node;
  * 
  */
 public class GenericActionPacket extends PacketContent {
-	private Node sender;
-	private SocketAddress destAddress;
+	protected Node sender;
+	protected SocketAddress destAddress;
 
 	// Constructors
 	// -------------------------------------------------------------------

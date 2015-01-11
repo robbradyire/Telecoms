@@ -54,7 +54,7 @@ public class Connection {
 		listOfWorkers.add(clientSocket);
 		stats.addWorker();
 	}
-	
+
 	/**
 	 * getID
 	 * gets the ID of a certain address
@@ -129,7 +129,8 @@ public class Connection {
 	 */
 	public void terminateWorkers() {
 		for (SocketAddress worker : connections.keySet()) {
-			stats.updateStats(this.getID(worker), currentNames.get(worker).length);
+			stats.updateStats(this.getID(worker),
+					currentNames.get(worker).length);
 			terminateWorker(worker);
 		}
 		server.print(stats.toString());
@@ -188,6 +189,6 @@ public class Connection {
 		for (SocketAddress socket : connections.keySet()) {
 			list.append(socket.toString() + "\n");
 		}
-		return list.toString().trim(); // remove newline char from the end
+		return list.toString().trim(); // remove newline char from the  very end
 	}
 }
