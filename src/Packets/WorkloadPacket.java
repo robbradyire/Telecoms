@@ -120,9 +120,4 @@ public class WorkloadPacket extends PacketContent {
 	public String toString() {
 		return new String(data);
 	}
-
-	@Deprecated
-	protected boolean hasBeenSent() {
-		return false;
-	}
 }

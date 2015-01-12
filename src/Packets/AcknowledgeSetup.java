@@ -126,9 +126,4 @@ public class AcknowledgeSetup extends PacketContent {
 		return "AcknowledgeSetup packet from " + server.getPortNumber()
 				+ " to " + getDestAddress();
 	}
-
-	@Deprecated
-	protected boolean hasBeenSent() {
-		return false;
-	}
 }

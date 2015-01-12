@@ -128,7 +128,7 @@ public abstract class PacketContent {
 	 * @return true: if Packet responded to
 	 * @return false: if Packet not yet responded to
 	 */
-	protected boolean hasBeenSent() {
+	public boolean hasBeenSent() {
 		return this.acknowledged;
 	}
 
@@ -144,7 +144,7 @@ public abstract class PacketContent {
 	 * send
 	 * sends the Packet to a Node
 	 */
-	protected abstract void send();
+	public abstract void send();
 
 	/**
 	 * Returns the content of the packet as String.

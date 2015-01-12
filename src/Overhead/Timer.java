@@ -1,4 +1,6 @@
-package Packets;
+package Overhead;
+
+import Packets.PacketContent;
 
 /**
  * @author Tomas Barry

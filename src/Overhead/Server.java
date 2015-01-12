@@ -10,8 +10,7 @@ import Packets.WorkRequest;
 import Packets.WorkloadPacket;
 
 public class Server extends Node {
-	//	private String target = "nishant gupta";
-	private final String target = "jimmy rustler";
+	private final String target = "mike weatherford";
 	private static final int DEFAULT_PORT = 50001;
 	private boolean taskComplete = false;
 	private Terminal terminal;
@@ -113,15 +112,19 @@ public class Server extends Node {
 	 * @throws Exception
 	 */
 	public synchronized void start() throws Exception {
-		connectionList = new Connection(this);
-		dataAllocatorThread = new Thread(dataAllocator);
-		dataAllocatorThread.start();
-		while (!taskComplete) {
-			this.wait(250);
-			connectionList.ping();
-			terminal.println("# of workers = "
-					+ connectionList.numberOfConnections() + ". "
-					+ dataAllocator.getNoOfNames() + "/100,000,000");
+		try {
+			connectionList = new Connection(this);
+			dataAllocatorThread = new Thread(dataAllocator);
+			dataAllocatorThread.start();
+			while (!taskComplete) {
+				this.wait(250);
+				connectionList.ping();
+				terminal.println("# of workers = "
+						+ connectionList.numberOfConnections() + ". "
+						+ dataAllocator.getNoOfNames() + "/100,000,000");
+			}
+		}
+		catch (NullPointerException e) {
 		}
 	}
 
@@ -135,7 +138,7 @@ public class Server extends Node {
 			(new Server(terminal, DEFAULT_PORT)).start();
 			terminal.println("Program completed");
 		}
-		catch (java.lang.Exception e) {
+		catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
