@@ -140,7 +140,7 @@ public class Statistics {
 		output += "Total time spent by workers: "
 				+ formatter.format(this.totalTime()) + " seconds\n";
 		output += "Percentage of names checked: "
-				+ (int) this.percentOfWorkDone() + "%";
+				+ formatter.format(this.percentOfWorkDone()) + "%";
 
 		return output;
 	}
