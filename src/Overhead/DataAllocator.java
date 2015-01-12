@@ -25,7 +25,7 @@ public class DataAllocator implements Runnable {
 	 */
 	public DataAllocator() {
 		namesQueue = new ConcurrentLinkedQueue<String>();
-		String textFile = "C:/Users/robert/Documents/names.txt";
+		String textFile = "names.txt";
 		file = new File(textFile);
 		namesProcessed = 0;
 		maxQueueSize = 100000;
